@@ -12,17 +12,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamTransferHistories(UserTeamTransferHistoryData userTeamTransferData, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = userTeamTransferData.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
-                        bulkCopy.BatchSize = 500;
-                        bulkCopy.DestinationTableName = "UserTeamTransferHistory";
+                        bulkCopy.BatchSize = 1000;
+                        bulkCopy.DestinationTableName = "UserTeamTransferHistoryStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -44,7 +44,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeamTransferHistory Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -128,15 +129,30 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT userteamtransferhistoryid AS id FROM dbo.UserTeamTransferHistory WHERE UserTeamId = @UserTeamId";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamTransferHistoryIdsForUserTeamId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                List<long> result = ReadListLong(reader);
+                    //string selectQuery = @"SELECT userteamtransferhistoryid AS id FROM dbo.UserTeamTransferHistory WHERE UserTeamId = @UserTeamId";
 
-                reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<long> result = ReadListLong(reader);
 
-                return result;
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -149,15 +165,25 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT DISTINCT userteamid AS id FROM dbo.UserTeamTransferHistory";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamIdsWithTransferHistory";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
+                    //string selectQuery = @"SELECT DISTINCT userteamid AS id FROM dbo.UserTeamTransferHistory";
 
-                List<int> result = ReadList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-                return result;
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -168,62 +194,94 @@ namespace FantasyPremierLeagueUserTeams
 
         public string userTeamTransferHistoryGameweek(int userTeamTransferHistoryId, SqlConnection db)
         {
-            //string selectQuery = @"SELECT team_name FROM dbo.UserTeamTransferHistorys WHERE id = " + userTeamTransferHistoryId.ToString();
+            try
+            {
+                //string selectQuery = @"SELECT team_name FROM dbo.UserTeamTransferHistorys WHERE id = " + userTeamTransferHistoryId.ToString();
 
-            var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId, commandTimeout: 300);
+                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId, commandTimeout: 300);
 
-            string userTeamTransferHistoryGameweek = Convert.ToString(userTeamTransferHistory.@event);
+                string userTeamTransferHistoryGameweek = Convert.ToString(userTeamTransferHistory.@event);
 
-            return userTeamTransferHistoryGameweek;
+                return userTeamTransferHistoryGameweek;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamTransferHistory Repository (userTeamTransferHistoryGameweek) error: " + ex.Message);
+                throw ex;
+            }
         }
 
         public List<int> GetCompetedUserTeamTransferHistoryIds(SqlConnection db)
         {
-            string selectQuery = @"SELECT utth.id FROM dbo.UserTeamTransferHistory utth INNER JOIN dbo.Gameweeks g ON utth.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
+            try
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetCompetedUserTeamTransferHistoryIds";
 
-            IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
+                    //string selectQuery = @"SELECT utth.id FROM dbo.UserTeamTransferHistory utth INNER JOIN dbo.Gameweeks g ON utth.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
 
-            List<int> result = ReadList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-            reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-            return result;
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamTransferHistory Repository (GetCompetedUserTeamTransferHistoryIds) error: " + ex.Message);
+                throw ex;
+            }
         }
 
         public DataTable GetMaxGameweekIdFromUserTeamTransferHistoryForUserTeamIds(List<int> userTeamIds, SqlConnection db)
         {
             try
             {
-                SqlCommand cmd = new SqlCommand();
- 
-                List<string> sqlParams = new List<string>();
-
-                int i = 0;
-                foreach (var value in userTeamIds)
+                using (SqlCommand cmd = new SqlCommand())
                 {
-                    var name = "@p" + i++;
-                    cmd.Parameters.AddWithValue(name, value);
-                    sqlParams.Add(name);
+                    int i = 1;
+                    var name = "";
+                    foreach (var userTeamId in userTeamIds)
+                    {
+                        name = "@UserTeamId" + i++;
+                        cmd.Parameters.AddWithValue(name, userTeamId);
+                    }
+
+                    int parameterCount = cmd.Parameters.Count;
+
+                    if (parameterCount < 50)
+                    {
+                        for (i = parameterCount + 1; i <= 50; i++)
+                        {
+                            name = "@UserTeamId" + i++;
+                            cmd.Parameters.AddWithValue(name, 0);
+                        }
+                    }
+
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetMaxGameweekIdForUserTeamIdsFromUserTeamTransferHistory";
+
+                    //Create SqlDataAdapter and DataTable
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable result = new DataTable();
+
+                    // this will query your database and return the result to your datatable
+                    da.Fill(result);
+                    da.Dispose();
+
+                    return result;
                 }
-
-                string paramNames = string.Join(",", sqlParams);
-
-                string selectQuery = @"SELECT userteamid,MAX(gameweekid) AS gameweekid FROM dbo.UserTeamTransferHistory WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
-
-                cmd.Connection = db;
-                cmd.CommandTimeout = 100;
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = selectQuery;
-
-                //Create SqlDataAdapter and DataTable
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable result = new DataTable();
-
-                // this will query your database and return the result to your datatable
-                da.Fill(result);
-                da.Dispose();
-
-                return result;
             }
             catch (Exception ex)
             {
@@ -231,6 +289,49 @@ namespace FantasyPremierLeagueUserTeams
                 throw ex;
             }
         }
+
+        //public DataTable GetMaxGameweekIdFromUserTeamTransferHistoryForUserTeamIds(List<int> userTeamIds, SqlConnection db)
+        //{
+        //    try
+        //    {
+        //        using (SqlCommand cmd = new SqlCommand())
+        //        {
+        //            List<string> sqlParams = new List<string>();
+
+        //            int i = 0;
+        //            foreach (var value in userTeamIds)
+        //            {
+        //                var name = "@p" + i++;
+        //                cmd.Parameters.AddWithValue(name, value);
+        //                sqlParams.Add(name);
+        //            }
+
+        //            string paramNames = string.Join(",", sqlParams);
+
+        //            string selectQuery = @"SELECT userteamid,MAX(gameweekid) AS gameweekid FROM dbo.UserTeamTransferHistory WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
+
+        //            cmd.Connection = db;
+        //            cmd.CommandTimeout = 100;
+        //            cmd.CommandType = CommandType.Text;
+        //            cmd.CommandText = selectQuery;
+
+        //            //Create SqlDataAdapter and DataTable
+        //            SqlDataAdapter da = new SqlDataAdapter(cmd);
+        //            DataTable result = new DataTable();
+
+        //            // this will query your database and return the result to your datatable
+        //            da.Fill(result);
+        //            da.Dispose();
+
+        //            return result;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error("UserTeamTransferHistory Repository (GetMaxGameweekIdFromUserTeamTransferHistoryForUserTeamIds) error: " + ex.Message);
+        //        throw ex;
+        //    }
+        //}
 
         List<int> ReadList(IDataReader reader)
         {

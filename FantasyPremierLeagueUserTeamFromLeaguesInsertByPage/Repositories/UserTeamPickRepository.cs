@@ -13,17 +13,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamPick(UserTeamPicks userTeamPicks, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = userTeamPicks.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
-                        bulkCopy.BatchSize = 100;
-                        bulkCopy.DestinationTableName = "UserTeamPick";
+                        bulkCopy.BatchSize = 1000;
+                        bulkCopy.DestinationTableName = "UserTeamPickStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -47,7 +47,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeamPick Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -157,15 +158,35 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT userteamid, gameweekid, position FROM dbo.UserTeamPick WHERE userteamid = @UserTeamId AND gameweekid = @GameweekId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamPickIdsForUserTeamIdAndGameweekId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId, GameweekId = gameweekId }, commandTimeout: 300);
+                    IDataParameter param1 = cmd.CreateParameter();
+                    param1.ParameterName = "@UserTeamId";
+                    param1.Value = userTeamId;
+                    cmd.Parameters.Add(param1);
 
-                List<UserTeamPickId> result = ReadUserTeamPickIdList(reader);
+                    IDataParameter param2 = cmd.CreateParameter();
+                    param2.ParameterName = "@GameweekId";
+                    param2.Value = gameweekId;
+                    cmd.Parameters.Add(param2);
 
-                reader.Close();
+                    //string selectQuery = @"SELECT userteamid, gameweekid, position FROM dbo.UserTeamPick WHERE userteamid = @UserTeamId AND gameweekid = @GameweekId;";
 
-                return result;
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<UserTeamPickId> result = ReadUserTeamPickIdList(reader);
+
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -178,36 +199,42 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                SqlCommand cmd = new SqlCommand();
-
-                List<string> sqlParams = new List<string>();
-
-                int i = 0;
-                foreach (var value in userTeamIds)
+                using (SqlCommand cmd = new SqlCommand())
                 {
-                    var name = "@p" + i++;
-                    cmd.Parameters.AddWithValue(name, value);
-                    sqlParams.Add(name);
+                    int i = 1;
+                    var name = "";
+                    foreach (var userTeamId in userTeamIds)
+                    {
+                        name = "@UserTeamId" + i++;
+                        cmd.Parameters.AddWithValue(name, userTeamId);
+                    }
+
+                    int parameterCount = cmd.Parameters.Count;
+
+                    if (parameterCount < 50)
+                    {
+                        for (i = parameterCount + 1; i <= 50; i++)
+                        {
+                            name = "@UserTeamId" + i++;
+                            cmd.Parameters.AddWithValue(name, 0);
+                        }
+                    }
+
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetMaxGameweekIdForUserTeamIdsFromUserTeamPick";
+
+                    //Create SqlDataAdapter and DataTable
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable result = new DataTable();
+
+                    // this will query your database and return the result to your datatable
+                    da.Fill(result);
+                    da.Dispose();
+
+                    return result;
                 }
-
-                string paramNames = string.Join(",", sqlParams);
-
-                string selectQuery = @"SELECT userteamid,MAX(gameweekid) AS gameweekid FROM dbo.UserTeamPick WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
-
-                cmd.Connection = db;
-                cmd.CommandTimeout = 100;
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = selectQuery;
-
-                //Create SqlDataAdapter and DataTable
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable result = new DataTable();
-
-                // this will query your database and return the result to your datatable
-                da.Fill(result);
-                da.Dispose();
-
-                return result;
             }
             catch (Exception ex)
             {
@@ -216,19 +243,72 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
+        //public DataTable GetMaxGameweekIdFromUserTeamPickForUserTeamIds(List<int> userTeamIds, SqlConnection db)
+        //{
+        //    try
+        //    {
+        //        using (SqlCommand cmd = new SqlCommand())
+        //        {
+        //            List<string> sqlParams = new List<string>();
+
+        //            int i = 0;
+        //            foreach (var value in userTeamIds)
+        //            {
+        //                var name = "@UserTeamId" + i++;
+        //                cmd.Parameters.AddWithValue(name, value);
+        //                sqlParams.Add(name);
+        //            }
+
+        //            string paramNames = string.Join(",", sqlParams);
+
+        //            string selectQuery = @"SELECT userteamid,MAX(gameweekid) AS gameweekid FROM dbo.UserTeamPick WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
+
+        //            cmd.Connection = db;
+        //            cmd.CommandTimeout = 100;
+        //            cmd.CommandType = CommandType.Text;
+        //            cmd.CommandText = selectQuery;
+
+        //            //Create SqlDataAdapter and DataTable
+        //            SqlDataAdapter da = new SqlDataAdapter(cmd);
+        //            DataTable result = new DataTable();
+
+        //            // this will query your database and return the result to your datatable
+        //            da.Fill(result);
+        //            da.Dispose();
+
+        //            return result;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error("UserTeamPick Repository (GetAllUserTeamPickIdsForUserTeamIdAndGameweekId) error: " + ex.Message);
+        //        throw ex;
+        //    }
+        //}
+
         public List<int> GetAllUserTeamPickIds(SqlConnection db)
         {
             try
             {
-                string selectQuery = @"SELECT DISTINCT userteamid FROM dbo.UserTeamPick;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamPickIds";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout:600);
+                    //string selectQuery = @"SELECT DISTINCT userteamid AS id FROM dbo.UserTeamPick;";
 
-                List<int> result = ReadUserTeamIdList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-                return result;
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -241,11 +321,24 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT ISNULL(MAX(gameweekid),0) FROM dbo.UserTeamPick WHERE userteamid = @UserTeamId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetMaxGameweekIdForUserTeamIdFromUserTeamPick";
 
-                int result = (int)db.ExecuteScalar(selectQuery, new { UserTeamId = userTeamId }, commandTimeout:300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                return result;
+                    //string selectQuery = @"SELECT ISNULL(MAX(gameweekid),0) FROM dbo.UserTeamPick WHERE userteamid = @UserTeamId;";
+
+                    int result = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -280,7 +373,7 @@ namespace FantasyPremierLeagueUserTeams
         //    //}
         //}
 
-        List<int> ReadUserTeamIdList(IDataReader reader)
+        List<int> ReadList(IDataReader reader)
         {
             try
             {

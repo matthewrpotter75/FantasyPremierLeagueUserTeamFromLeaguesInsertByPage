@@ -5,14 +5,13 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System.Data.SqlClient;
-using System.Configuration;
-using System.Data;
 
 namespace FantasyPremierLeagueUserTeams
 {
     public class FantasyPremierLeagueAPIGameweekHistory
     {
-        public static void GetUserTeamHistoryDataJson(int userTeamId, List<int> userTeamIds, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
+        //public static void GetUserTeamHistoryDataJson(int userTeamId, List<int> userTeamIds, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
+        public static void GetUserTeamHistoryDataJson(int userTeamId, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
         {
             try
             {
@@ -43,7 +42,8 @@ namespace FantasyPremierLeagueUserTeams
                         }
 
                         //Process UserTeamSeasonHistory
-                        if (userTeamHistoryData.past != null && !userTeamIds.Contains(userTeamId))
+                        //if (userTeamHistoryData.past != null && !userTeamIds.Contains(userTeamId))
+                        if (userTeamHistoryData.past != null)
                         {
                             GetUserTeamSeasonJson(userTeamId, userTeamHistoryData, userTeamSeasonsInsert, db);
                         }
@@ -51,7 +51,7 @@ namespace FantasyPremierLeagueUserTeams
                         //Process UserTeamGameweekHistory
                         if (maxGWFromGameweekHistoryForUserTeamId < Globals.latestGameweek && Globals.latestGameweek > 0)
                         {
-                            GetUserTeamGameweekHistoryJson(userTeamId, maxGWFromGameweekHistoryForUserTeamId, userTeamHistoryData, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
+                            GetUserTeamGameweekHistoryJson(userTeamId, maxGWFromGameweekHistoryForUserTeamId, userTeamHistoryData, userTeamGameweekHistoriesInsert, db);
                         }
                     }
                     else
@@ -101,7 +101,7 @@ namespace FantasyPremierLeagueUserTeams
                     userTeamChipId.gameweekid = userTeamChip.@event;
                     userTeamChipId.chipid = userTeamChip.chip;
 
-                    if (!userTeamChipIds.Contains(userTeamChipId))
+                    if (!userTeamChipIds.Contains(userTeamChipId) && !userTeamChipsInsert.Contains(userTeamChip))
                     {
                         userTeamChipsInsert.Add(userTeamChip);
                     }
@@ -138,7 +138,7 @@ namespace FantasyPremierLeagueUserTeams
                         userTeamSeason.userteamid = userTeamId;
                         //userTeamSeason.season = userTeamSeasonRepository.GetSeasonIdFromSeasonName(userTeamSeason.season_name);
 
-                        if (!UserTeamSeasonNames.Contains(userTeamSeason.season_name))
+                        if (!UserTeamSeasonNames.Contains(userTeamSeason.season_name) && !userTeamSeasonsInsert.Contains(userTeamSeason))
                         {
                             userTeamSeasonsInsert.Add(userTeamSeason);
                         }
@@ -156,7 +156,7 @@ namespace FantasyPremierLeagueUserTeams
             }        
         }
 
-        public static void GetUserTeamGameweekHistoryJson(int userTeamId, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistoryData userTeamHistoryData, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, SqlConnection db)
+        public static void GetUserTeamGameweekHistoryJson(int userTeamId, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistoryData userTeamHistoryData, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, SqlConnection db)
         {
             //Logger.Out("GetUserTeamGameweekHistoryJson starting");
             //int gameweekId;
@@ -179,21 +179,13 @@ namespace FantasyPremierLeagueUserTeams
                     {
                         userTeamGameweekHistory.userteamid = userTeamId;
 
-                        if (!userTeamGameweekHistoryIds.Contains(userTeamGameweekHistory.@event))
+                        if (!userTeamGameweekHistoryIds.Contains(userTeamGameweekHistory.@event) && !userTeamGameweekHistoriesInsert.Contains(userTeamGameweekHistory))
                         {
                             userTeamGameweekHistoriesInsert.Add(userTeamGameweekHistory);
                         }
                         //else
                         //{
                         //    userTeamGameweekHistoryRepository.UpdateUserTeamGameweekHistory(userTeamGameweekHistory);
-                        //}
-
-                        //gameweekId = userTeamGameweekHistory.@event;
-
-                        //Process UserTeamPick and UserTeamPickAutomaticSub
-                        //if (gameweekId > maxGWFromPicksForUserTeamId)
-                        //{
-                        //    GetUserTeamPickDataJson(userTeamId, userTeamPicksUrl, gameweekId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
                         //}
                     }
 

@@ -5,14 +5,12 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System.Data.SqlClient;
-using System.Configuration;
-using System.Data;
 
 namespace FantasyPremierLeagueUserTeams
 {
     public class FantasyPremierLeagueAPITransferHistory
     {
-        public static void GetUserTeamTransferHistoryDataJson(int userTeamId, int maxGWFromTransferHistoryForUserTeamId, UserTeamTransferHistoryData userTeamTransferHistoriesInsert, SqlConnection db)
+        public static void GetUserTeamTransferHistoryDataJson(int userTeamId, UserTeamTransferHistoryData userTeamTransferHistoriesInsert, SqlConnection db)
         {
             try
             {
@@ -68,7 +66,7 @@ namespace FantasyPremierLeagueUserTeams
                     elementoutForKey = userTeamTransferHistory.element_out;
                     userTeamTransferHistory.userteamtransferhistoryid = userTeamIdForKey + elementinForKey + elementoutForKey;
 
-                    if (!UserTeamTransferHistoryIds.Contains(userTeamTransferHistory.userteamtransferhistoryid))
+                    if (!UserTeamTransferHistoryIds.Contains(userTeamTransferHistory.userteamtransferhistoryid) && !userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory))
                     {
                         userTeamTransferHistoriesInsert.Add(userTeamTransferHistory);
                     }

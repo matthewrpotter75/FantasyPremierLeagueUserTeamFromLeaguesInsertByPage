@@ -13,17 +13,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamChip(UserTeamChips userTeamChips, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = userTeamChips.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
                         bulkCopy.BatchSize = 500;
-                        bulkCopy.DestinationTableName = "UserTeamChip";
+                        bulkCopy.DestinationTableName = "UserTeamChipStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -42,7 +42,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeamChip Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -176,15 +177,43 @@ namespace FantasyPremierLeagueUserTeams
                 gameweekId = userTeamChipId.gameweekid;
                 chipId = userTeamChipId.chipid;
 
-                string selectQuery = @"SELECT DISTINCT userteamid, gameweekid, chipid FROM dbo.UserTeamChip WHERE userteamid = @UserTeamId AND gameweekid = @GameweekId AND chipid = @ChipId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamChipIdsForUserTeamIdAndGameweekIdAndChipId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId, GameweekId = gameweekId, ChipId = chipId });
+                    IDataParameter param1 = cmd.CreateParameter();
+                    param1.ParameterName = "@UserTeamId";
+                    param1.Value = userTeamId;
+                    cmd.Parameters.Add(param1);
 
-                List<UserTeamChipId> result = ReadUserTeamChipIdList(reader);
+                    IDataParameter param2 = cmd.CreateParameter();
+                    param2.ParameterName = "@GameweekId";
+                    param2.Value = gameweekId;
+                    cmd.Parameters.Add(param2);
 
-                reader.Close();
+                    IDataParameter param3 = cmd.CreateParameter();
+                    param3.ParameterName = "@ChipId";
+                    param3.Value = chipId;
+                    cmd.Parameters.Add(param3);
+                    cmd.Parameters.Add(param3);
 
-                return result;
+                    //string selectQuery = @"SELECT DISTINCT userteamid, gameweekid, chipid FROM dbo.UserTeamChip WHERE userteamid = @UserTeamId AND gameweekid = @GameweekId AND chipid = @ChipId;";
+
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        //IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId, GameweekId = gameweekId, ChipId = chipId });
+
+                        List<UserTeamChipId> result = ReadUserTeamChipIdList(reader);
+
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -197,18 +226,32 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
-                //{
-                    string selectQuery = @"SELECT DISTINCT userteamid, gameweekid, chipid FROM dbo.UserTeamChip WHERE userteamid = @UserTeamId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamChipIdsForUserTeamId";
 
-                    IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId });
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                    List<UserTeamChipId> result = ReadUserTeamChipIdList(reader);
+                    //string selectQuery = @"SELECT DISTINCT userteamid, gameweekid, chipid FROM dbo.UserTeamChip WHERE userteamid = @UserTeamId;";
 
-                    reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        //IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId });
 
-                    return result;
-                //}
+                        List<UserTeamChipId> result = ReadUserTeamChipIdList(reader);
+
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -221,19 +264,26 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
-                //{
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamIdsWithChips";
+
                     //Need to change query to include all userteamid up until max so don't reprocess blanks
-                    string selectQuery = @"SELECT DISTINCT userteamid AS id FROM dbo.UserTeamChip";
+                    //string selectQuery = @"SELECT DISTINCT userteamid AS id FROM dbo.UserTeamChip";
 
-                    IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                    List<int> result = ReadIdList(reader);
+                        reader.Close();
+                        reader.Dispose();
 
-                    reader.Close();
-
-                    return result;
-                //}
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -246,14 +296,20 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
-                //{
-                    string selectQuery = @"SELECT MAX(userteamid) AS id FROM dbo.UserTeamChip utc WHERE NOT EXISTS (SELECT 1 FROM dbo.UserTeam_ManualInserts WHERE userteamid = utc.userteamid);";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetLatestUserTeamChipUserTeamId";
 
-                    var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 300);
+                    //string selectQuery = @"SELECT MAX(userteamid) AS id FROM dbo.UserTeamChip utc WHERE NOT EXISTS (SELECT 1 FROM dbo.UserTeam_ManualInserts WHERE userteamid = utc.userteamid);";
+
+                    int result = Convert.ToInt32(cmd.ExecuteScalar());
+                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 300);
 
                     return result;
-                //}
+                }
             }
             catch (Exception ex)
             {
@@ -282,16 +338,26 @@ namespace FantasyPremierLeagueUserTeams
         public List<int> GetCompetedUserTeamChipIds(SqlConnection db)
         {
             try
-            { 
-                string selectQuery = @"SELECT c.id FROM dbo.UserTeamChip c INNER JOIN dbo.Gameweeks g ON c.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetCompetedUserTeamChipIds";
 
-                IDataReader reader = db.ExecuteReader(selectQuery);
+                    //string selectQuery = @"SELECT c.id FROM dbo.UserTeamChip c INNER JOIN dbo.Gameweeks g ON c.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
 
-                List<int> result = ReadList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-                return result;
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -304,11 +370,25 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT chipid AS id FROM dbo.Chip utc WHERE chipname = @ChipName;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetChipIdFromName";
 
-                var result = db.ExecuteScalar<int>(selectQuery, new { ChipName = chipName }, commandTimeout: 300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@ChipName";
+                    param.Value = chipName;
+                    cmd.Parameters.Add(param);
 
-                return result;
+                    //string selectQuery = @"SELECT chipid AS id FROM dbo.Chip utc WHERE chipname = @ChipName;";
+
+                    //var result = db.ExecuteScalar<int>(selectQuery, new { ChipName = chipName }, commandTimeout: 300);
+                    int result = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -318,29 +398,6 @@ namespace FantasyPremierLeagueUserTeams
         }
 
         List<int> ReadList(IDataReader reader)
-        {
-            try
-            { 
-                List<int> list = new List<int>();
-                int column = reader.GetOrdinal("chipid");
-
-                while (reader.Read())
-                {
-                    //check for the null value and than add 
-                    if (!reader.IsDBNull(column))
-                        list.Add(reader.GetInt32(column));
-                }
-
-                return list;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("UserTeamChip Repository (ReadList) error: " + ex.Message);
-                throw ex;
-            }
-        }
-
-        List<int> ReadIdList(IDataReader reader)
         {
             try
             { 
@@ -358,10 +415,33 @@ namespace FantasyPremierLeagueUserTeams
             }
             catch (Exception ex)
             {
-                Logger.Error("UserTeamChip Repository (ReadIdList) error: " + ex.Message);
+                Logger.Error("UserTeamChip Repository (ReadList) error: " + ex.Message);
                 throw ex;
             }
         }
+
+        //List<int> ReadIdList(IDataReader reader)
+        //{
+        //    try
+        //    { 
+        //        List<int> list = new List<int>();
+        //        int column = reader.GetOrdinal("id");
+
+        //        while (reader.Read())
+        //        {
+        //            //check for the null value and than add 
+        //            if (!reader.IsDBNull(column))
+        //                list.Add(reader.GetInt32(column));
+        //        }
+
+        //        return list;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error("UserTeamChip Repository (ReadIdList) error: " + ex.Message);
+        //        throw ex;
+        //    }
+        //}
 
         List<UserTeamChipId> ReadUserTeamChipIdList(IDataReader reader)
         {

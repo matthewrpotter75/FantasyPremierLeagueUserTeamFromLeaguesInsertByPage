@@ -5,8 +5,6 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System.Data.SqlClient;
-using System.Configuration;
-using System.Data;
 
 namespace FantasyPremierLeagueUserTeams
 {
@@ -53,6 +51,7 @@ namespace FantasyPremierLeagueUserTeams
                         if (!userTeamIds.Contains(userTeam.id))
                         {
                             userTeamRepository.InsertUserTeam(userTeam, db);
+                            userTeamIds.Add(userTeam.id);
                             Globals.userTeamInsertCount += 1;
                         }
                         else
@@ -179,7 +178,7 @@ namespace FantasyPremierLeagueUserTeams
                     //needed if want to assign value from parent to add into db table
                     classicLeague.userteamid = userTeamId;
 
-                    if (!classicLeagueIds.Contains(classicLeague.id))
+                    if (!classicLeagueIds.Contains(classicLeague.id) && !userTeamClassicLeaguesInsert.Contains(classicLeague))
                     {
                         //classicLeagueRepository.InsertUserTeamClassicLeague(classicLeague, db);
                         userTeamClassicLeaguesInsert.Add(classicLeague);
@@ -212,7 +211,7 @@ namespace FantasyPremierLeagueUserTeams
                     //needed if want to assign value from parent to add into db table
                     h2hLeague.userteamid = userTeamId;
 
-                    if (!h2hLeagueIds.Contains(h2hLeague.id))
+                    if (!h2hLeagueIds.Contains(h2hLeague.id) && !userTeamH2hLeaguesInsert.Contains(h2hLeague))
                     {
                         //h2hLeagueRepository.InsertUserTeamH2hLeague(h2hLeague, db);
                         userTeamH2hLeaguesInsert.Add(h2hLeague);

@@ -1,12 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 //using System.ComponentModel.DataAnnotations;
-using Dapper.Contrib;
 using Dapper.Contrib.Extensions;
 
 namespace FantasyPremierLeagueUserTeams
@@ -107,6 +102,7 @@ namespace FantasyPremierLeagueUserTeams
     {
         public List<UserTeamCupMatch> matches { get; set; }
         public UserTeamCupStatus status { get; set; }
+        public int? cup_league { get; set; }
     }
 
     public class UserTeamCupMatch
@@ -130,7 +126,7 @@ namespace FantasyPremierLeagueUserTeams
         public int entry_2_loss { get; set; }
         public int entry_2_total { get; set; }
         public bool is_knockout { get; set; }
-        public int winner { get; set; }
+        public int? winner { get; set; }
         public int? seed_value { get; set; }
         public int @event { get; set; }
         public string tiebreak { get; set; }

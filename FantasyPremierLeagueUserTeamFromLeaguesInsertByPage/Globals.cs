@@ -20,6 +20,9 @@ namespace FantasyPremierLeagueUserTeams
         public static int leagueCountFromUserTeamClassicLeagueForUserTeamId { get; set; }
         public static int existingUserTeamId { get; set; }
         public static int userTeamInsertCount { get; set; }
+        public static int pageId { get; set; }
+        public static int leagueRetries { get; set; }
+        public static int userTeamRetries { get; set; }
 
         //private static int _latestGameweek;
         //public static int latestGameweek

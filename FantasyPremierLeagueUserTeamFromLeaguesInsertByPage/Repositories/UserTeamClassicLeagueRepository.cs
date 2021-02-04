@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Configuration;
 using System.Data;
 using Dapper;
 using DapperExtensions;
-using System.Linq;
 using DataStreams.ETL;
 
 namespace FantasyPremierLeagueUserTeams
@@ -14,17 +12,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamClassicLeague(UserTeamClassicLeagues classicleagues, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = classicleagues.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
                         bulkCopy.BatchSize = 500;
-                        bulkCopy.DestinationTableName = "UserTeamClassicLeague";
+                        bulkCopy.DestinationTableName = "UserTeamClassicLeagueStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -46,7 +44,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeamClassicLeague Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -152,15 +151,29 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT leagueid AS id FROM dbo.UserTeamClassicLeague WHERE UserTeamId = @UserTeamId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllClassicLeagueIdsForUserTeamId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                List<int> result = ReadList(reader);
+                    //string selectQuery = @"SELECT leagueid AS id FROM dbo.UserTeamClassicLeague WHERE UserTeamId = @UserTeamId;";
 
-                reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                return result;
+                        reader.Close();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -209,36 +222,44 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                SqlCommand cmd = new SqlCommand();
-
-                List<string> sqlParams = new List<string>();
-
-                int i = 0;
-                foreach (var value in userTeamIds)
+                using (SqlCommand cmd = new SqlCommand())
                 {
-                    var name = "@p" + i++;
-                    cmd.Parameters.AddWithValue(name, value);
-                    sqlParams.Add(name);
+                    List<string> sqlParams = new List<string>();
+
+                    int i = 1;
+                    var name = "";
+                    foreach (var userTeamId in userTeamIds)
+                    {
+                        name = "@UserTeamId" + i++;
+                        cmd.Parameters.AddWithValue(name, userTeamId);
+                    }
+
+                    int parameterCount = cmd.Parameters.Count;
+
+                    if (parameterCount < 50)
+                    {
+                        for (i = parameterCount + 1; i <= 50; i++)
+                        {
+                            name = "@UserTeamId" + i++;
+                            cmd.Parameters.AddWithValue(name, 0);
+                        }
+                    }
+
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds";
+
+                    //Create SqlDataAdapter and DataTable
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable result = new DataTable();
+
+                    // this will query your database and return the result to your datatable
+                    da.Fill(result);
+                    da.Dispose();
+
+                    return result;
                 }
-
-                string paramNames = string.Join(",", sqlParams);
-
-                string selectQuery = @"SELECT userteamid,COUNT(*) AS leagueCount FROM dbo.UserTeamClassicLeague WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
-
-                cmd.Connection = db;
-                cmd.CommandTimeout = 100;
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = selectQuery;
-
-                //Create SqlDataAdapter and DataTable
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable result = new DataTable();
-
-                // this will query your database and return the result to your datatable
-                da.Fill(result);
-                da.Dispose();
-
-                return result;
             }
             catch (Exception ex)
             {
@@ -246,6 +267,49 @@ namespace FantasyPremierLeagueUserTeams
                 throw ex;
             }
         }
+
+        //public DataTable GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds(List<int> userTeamIds, SqlConnection db)
+        //{
+        //    try
+        //    {
+        //        using (SqlCommand cmd = new SqlCommand())
+        //        {
+        //            List<string> sqlParams = new List<string>();
+
+        //            int i = 0;
+        //            foreach (var value in userTeamIds)
+        //            {
+        //                var name = "@p" + i++;
+        //                cmd.Parameters.AddWithValue(name, value);
+        //                sqlParams.Add(name);
+        //            }
+
+        //            string paramNames = string.Join(",", sqlParams);
+
+        //            string selectQuery = @"SELECT userteamid,COUNT(*) AS leagueCount FROM dbo.UserTeamClassicLeague WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
+
+        //            cmd.Connection = db;
+        //            cmd.CommandTimeout = 300;
+        //            cmd.CommandType = CommandType.Text;
+        //            cmd.CommandText = selectQuery;
+
+        //            //Create SqlDataAdapter and DataTable
+        //            SqlDataAdapter da = new SqlDataAdapter(cmd);
+        //            DataTable result = new DataTable();
+
+        //            // this will query your database and return the result to your datatable
+        //            da.Fill(result);
+        //            da.Dispose();
+
+        //            return result;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error("UserTeamClassicLeague Repository (GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds) error: " + ex.Message);
+        //        throw ex;
+        //    }
+        //}
 
         List<int> ReadList(IDataReader reader)
         {

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Configuration;
 using System.Data;
 using Dapper;
 using DapperExtensions;
-using System.Linq;
 using DataStreams.ETL;
 
 namespace FantasyPremierLeagueUserTeams
@@ -14,17 +12,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamH2hLeague(UserTeamH2hLeagues h2hleagues, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = h2hleagues.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
                         bulkCopy.BatchSize = 500;
-                        bulkCopy.DestinationTableName = "UserTeamH2hLeague";
+                        bulkCopy.DestinationTableName = "UserTeamH2hLeagueStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -45,7 +43,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeamH2hLeague Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -148,15 +147,30 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT leagueid AS id FROM dbo.UserTeamH2hLeague WHERE UserTeamId = @UserTeamId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 100;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllH2hLeagueIdsForUserTeamId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                List<int> result = ReadList(reader);
+                    //string selectQuery = @"SELECT leagueid AS id FROM dbo.UserTeamH2hLeague WHERE UserTeamId = @UserTeamId;";
 
-                reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                return result;
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -185,16 +199,26 @@ namespace FantasyPremierLeagueUserTeams
         public List<int> GetCompletedH2hLeagueIds(SqlConnection db)
         {
             try
-            { 
-                string selectQuery = @"SELECT h.id FROM dbo.UserTeamH2hLeague h INNER JOIN dbo.Gameweeks g ON h.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 100;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetCompletedH2hLeagueIds";
 
-                IDataReader reader = db.ExecuteReader(selectQuery);
+                    //string selectQuery = @"SELECT h.id FROM dbo.UserTeamH2hLeague h INNER JOIN dbo.Gameweeks g ON h.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
 
-                List<int> result = ReadList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-                return result;
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {

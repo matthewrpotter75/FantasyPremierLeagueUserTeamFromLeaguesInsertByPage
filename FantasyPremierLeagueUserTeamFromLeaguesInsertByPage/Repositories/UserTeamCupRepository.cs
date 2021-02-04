@@ -110,15 +110,30 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT id FROM dbo.UserTeamCup WHERE homeTeam_userteamid = @UserTeamId OR awayTeam_userteamid = @UserTeamId";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllCupIdsForUserId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId });
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                List<int> result = ReadList(reader);
+                    //string selectQuery = @"SELECT id FROM dbo.UserTeamCup WHERE homeTeam_userteamid = @UserTeamId OR awayTeam_userteamid = @UserTeamId";
 
-                reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                return result;
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -146,18 +161,33 @@ namespace FantasyPremierLeagueUserTeams
 
         public List<int> GetCompetedCupIds(SqlConnection db)
         {
-            //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
-            //{
-                string selectQuery = @"SELECT c.id FROM dbo.UserTeamCup c INNER JOIN dbo.Gameweeks g ON c.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
+            try
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetCompetedCupIds";
 
-                IDataReader reader = db.ExecuteReader(selectQuery);
+                    //string selectQuery = @"SELECT c.id FROM dbo.UserTeamCup c INNER JOIN dbo.Gameweeks g ON c.gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
 
-                List<int> result = ReadList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-                return result;
-            //}
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamCup Repository (GetCompetedCupIds) error: " + ex.Message);
+                throw ex;
+            }
         }
 
         List<int> ReadList(IDataReader reader)

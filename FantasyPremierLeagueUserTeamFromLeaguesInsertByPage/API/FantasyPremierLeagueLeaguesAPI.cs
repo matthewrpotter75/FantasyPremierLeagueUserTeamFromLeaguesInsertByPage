@@ -5,8 +5,8 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net;
 using System.Data.SqlClient;
-using System.Configuration;
 using System.Data;
+using System.Configuration;
 
 namespace FantasyPremierLeagueUserTeams
 {
@@ -14,19 +14,13 @@ namespace FantasyPremierLeagueUserTeams
     {
         #region methods
 
-        public static bool GetLeagueDataJson(int leagueId, int pageId, List<int> userTeamIds, string userTeamLeaguesUrl, string userTeamUrl, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, UserTeamChips userTeamChipsInsert, UserTeamTransferHistoryData userTeamTransferHistoriesInsert, UserTeamSeasons userTeamSeasonsInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, int userTeamRetries, SqlConnection db)
+        public static bool GetLeagueDataJson(int leagueId, List<int> userTeamIds, string userTeamLeaguesUrl, string userTeamUrl, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, UserTeamChips userTeamChipsInsert, UserTeamTransferHistoryData userTeamTransferHistoriesInsert, UserTeamSeasons userTeamSeasonsInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {
-            int leagueRetries = 0;
-
             UserTeamRepository userTeamRepository = new UserTeamRepository();
             UserTeamPickRepository userTeamPickRepository = new UserTeamPickRepository();
-            UserTeamPickAutomaticSubRepository userTeamPickAutomaticSubRepository = new UserTeamPickAutomaticSubRepository();
             UserTeamGameweekHistoryRepository userTeamGameweekHistoryRepository = new UserTeamGameweekHistoryRepository();
-            UserTeamChipRepository userTeamChipRepository = new UserTeamChipRepository();
             UserTeamTransferHistoryRepository userTeamTransferHistoryRepository = new UserTeamTransferHistoryRepository();
-            UserTeamSeasonRepository userTeamSeasonRepository = new UserTeamSeasonRepository();
             UserTeamClassicLeagueRepository userTeamClassicLeagueRepository = new UserTeamClassicLeagueRepository();
-            UserTeamH2hLeagueRepository userTeamH2hLeagueRepository = new UserTeamH2hLeagueRepository();
 
             try
             {
@@ -34,7 +28,7 @@ namespace FantasyPremierLeagueUserTeams
                 bool has_next = false;
                 List<int> leagueUserTeamIds = new List<int>();
 
-                string url = string.Format(userTeamLeaguesUrl, leagueId, pageId);
+                string url = string.Format(userTeamLeaguesUrl, leagueId, Globals.pageId);
 
                 HttpClient client = new HttpClient();
                 JsonSerializer serializer = new JsonSerializer();
@@ -58,8 +52,15 @@ namespace FantasyPremierLeagueUserTeams
                         string leagueName = league.name;
                         has_next = standings.has_next;
 
-                        Logger.Out(leagueName + " (" + Convert.ToString(leagueId) + "): Page " + Convert.ToString(pageId));
+                        Logger.Out(leagueName + " (" + Convert.ToString(leagueId) + "): Page " + Convert.ToString(Globals.pageId));
                         Logger.Out("");
+
+                        if (db.State == ConnectionState.Closed)
+                        {
+                            db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString;
+                            db.Open();
+                            Logger.Error("GetLeagueDataJson Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): Reopening closed db connection");
+                        }
 
                         List<int> pageUserTeamIds = new List<int>();
 
@@ -91,7 +92,7 @@ namespace FantasyPremierLeagueUserTeams
                                 Globals.leagueCountFromUserTeamClassicLeagueForUserTeamId = GetColumnNameValue(userTeamId, dtClassicLeagueCountForUserTeam, "leagueCount");
                                 Globals.existingUserTeamId = GetColumnNameValue(userTeamId, dtUserTeam, "userteamid");
 
-                                FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, userTeamIds, maxGWFromGameweekHistoryForUserTeamId, maxGWFromPicksForUserTeamId, maxGWFromTransferHistoryForUserTeamId, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
+                                FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, userTeamIds, maxGWFromGameweekHistoryForUserTeamId, maxGWFromPicksForUserTeamId, maxGWFromTransferHistoryForUserTeamId, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
                             }
                         }
 
@@ -102,80 +103,21 @@ namespace FantasyPremierLeagueUserTeams
             }
             catch (Exception ex)
             {
-                Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + pageId.ToString() + "): " + ex.Message);
-                //throw new Exception("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + pageId.ToString() + "): " + ex.Message);
+                Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): " + ex.Message);
 
                 bool has_next = true;
 
-                if (leagueRetries < 50)
+                if (Globals.leagueRetries < 10)
                 {
-                    //int userTeamPickRowsInserted = 0;
-                    //int userTeamPickAutomaticSubsRowsInserted = 0;
-                    //int userTeamGameweekHistoryRowsInserted = 0;
-                    //int userTeamChipRowsInserted = 0;
-                    //int userTeamTransferHistoryRowsInserted = 0;
-                    //int userTeamSeasonRowsInserted = 0;
-                    //int userTeamClassicLeagueRowsInserted = 0;
-                    //int userTeamH2hLeagueRowsInserted = 0;
-
-                    //userTeamChipRowsInserted = userTeamChipRepository.InsertUserTeamChip(userTeamChipsInsert, db);
-                    //Logger.Out("UserTeamChip bulk insert complete");
-
-                    ////Write UserTeamGameweekHistory to the db
-                    //userTeamGameweekHistoryRowsInserted = userTeamGameweekHistoryRepository.InsertUserTeamGameweekHistories(userTeamGameweekHistoriesInsert, db);
-                    //Logger.Out("UserTeamGameweekHistory bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    ////Write UserTeamPick to the db
-                    //userTeamPickRowsInserted = userTeamPickRepository.InsertUserTeamPick(userTeamPicksInsert, db);
-                    //Logger.Out("UserTeamPick bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    ////Write UserTeamPickAutomaticSub to the db
-                    //userTeamPickAutomaticSubsRowsInserted = userTeamPickAutomaticSubRepository.InsertUserTeamPickAutomaticSubs(userTeamPickAutomaticSubsInsert, db);
-                    //Logger.Out("UserTeamPickAutomaticSub bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    ////Write UserTeamTransferHistory to the db
-                    //userTeamTransferHistoryRowsInserted = userTeamTransferHistoryRepository.InsertUserTeamTransferHistories(userTeamTransferHistoriesInsert, db);
-                    //Logger.Out("UserTeamTransferHistory bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    ////Write UserTeamSeason to the db
-                    //userTeamSeasonRowsInserted = userTeamSeasonRepository.InsertUserTeamSeason(userTeamSeasonsInsert, db);
-                    //Logger.Out("UserTeamSeason bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    ////Write UserTeamClassicLeague to the db
-                    //userTeamClassicLeagueRowsInserted = userTeamClassicLeagueRepository.InsertUserTeamClassicLeague(userTeamClassicLeaguesInsert, db);
-                    //Logger.Out("UserTeamClassicLeague bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    ////Write UserTeamH2hLeague to the db
-                    //userTeamH2hLeagueRowsInserted = userTeamH2hLeagueRepository.InsertUserTeamH2hLeague(userTeamH2hLeaguesInsert, db);
-                    //Logger.Out("UserTeamH2hLeague bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
-
-                    //Logger.Out("");
-                    //Logger.Out("UserTeamChip: " + Convert.ToString(userTeamChipRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamGameweekHistory: " + Convert.ToString(userTeamGameweekHistoryRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamPick: " + Convert.ToString(userTeamPickRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamPickAutomaticSub: " + Convert.ToString(userTeamPickAutomaticSubsRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamTransferHistory: " + Convert.ToString(userTeamTransferHistoryRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamSeason: " + Convert.ToString(userTeamSeasonRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamClassicLeague: " + Convert.ToString(userTeamClassicLeagueRowsInserted) + " rows inserted");
-                    //Logger.Out("UserTeamH2hLeague: " + Convert.ToString(userTeamH2hLeagueRowsInserted) + " rows inserted");
-                    //Logger.Out("");
-
-                    //leagueRetries += 1;
-                    //userTeamPicksInsert.Clear();
-                    //userTeamPickAutomaticSubsInsert.Clear();
-                    //userTeamGameweekHistoriesInsert.Clear();
-                    //userTeamChipsInsert.Clear();
-                    //userTeamTransferHistoriesInsert.Clear();
-                    //userTeamSeasonsInsert.Clear();
-                    //userTeamClassicLeaguesInsert.Clear();
-                    //userTeamH2hLeaguesInsert.Clear();
-
-                    has_next = FantasyPremierLeagueLeaguesAPIClient.GetLeagueDataJson(leagueId, pageId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
+                    has_next = GetLeagueDataJson(leagueId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                    Globals.leagueRetries += 1;
                 }
                 else
                 {
                     Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + "):  League/Page doesn't exist skipping to next!!!");
-                    leagueRetries = 0;
+                    //Program.WriteToDB(pageId, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                    Globals.leagueRetries = 0;
+                    throw new Exception("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): " + ex.Message);
                 }
 
                 return has_next;

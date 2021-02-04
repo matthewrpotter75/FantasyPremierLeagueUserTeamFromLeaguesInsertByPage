@@ -129,6 +129,7 @@ namespace FantasyPremierLeagueUserTeams
                         List<int> result = ReadList(reader);
 
                         reader.Close();
+                        reader.Dispose();
 
                         return result;
                     }
@@ -162,36 +163,42 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                SqlCommand cmd = new SqlCommand();
-
-                List<string> sqlParams = new List<string>();
-
-                int i = 0;
-                foreach (var value in userTeamIds)
+                using (SqlCommand cmd = new SqlCommand())
                 {
-                    var name = "@p" + i++;
-                    cmd.Parameters.AddWithValue(name, value);
-                    sqlParams.Add(name);
+                    int i = 1;
+                    var name = "";
+                    foreach (var userTeamId in userTeamIds)
+                    {
+                        name = "@UserTeamId" + i++;
+                        cmd.Parameters.AddWithValue(name, userTeamId);
+                    }
+
+                    int parameterCount = cmd.Parameters.Count;
+
+                    if (parameterCount < 50)
+                    {
+                        for (i = parameterCount + 1; i <= 50; i++)
+                        {
+                            name = "@UserTeamId" + i++;
+                            cmd.Parameters.AddWithValue(name, 0);
+                        }
+                    }
+
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 100;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetUserTeamIdForUserTeamIdsFromUserTeam";
+
+                    //Create SqlDataAdapter and DataTable
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable result = new DataTable();
+
+                    // this will query your database and return the result to your datatable
+                    da.Fill(result);
+                    da.Dispose();
+
+                    return result;
                 }
-
-                string paramNames = string.Join(",", sqlParams);
-
-                string selectQuery = @"SELECT id AS userteamid FROM dbo.UserTeam WHERE id IN (" + paramNames + ");";
-
-                cmd.Connection = db;
-                cmd.CommandTimeout = 100;
-                cmd.CommandType = CommandType.Text;
-                cmd.CommandText = selectQuery;
-
-                //Create SqlDataAdapter and DataTable
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable result = new DataTable();
-
-                // this will query your database and return the result to your datatable
-                da.Fill(result);
-                da.Dispose();
-
-                return result;
             }
             catch (Exception ex)
             {
@@ -200,19 +207,72 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
+        //public DataTable GetUserTeamForUserTeamIds(List<int> userTeamIds, SqlConnection db)
+        //{
+        //    try
+        //    {
+        //        using (SqlCommand cmd = new SqlCommand())
+        //        {
+        //            List<string> sqlParams = new List<string>();
+
+        //            int i = 0;
+        //            foreach (var value in userTeamIds)
+        //            {
+        //                var name = "@p" + i++;
+        //                cmd.Parameters.AddWithValue(name, value);
+        //                sqlParams.Add(name);
+        //            }
+
+        //            string paramNames = string.Join(",", sqlParams);
+
+        //            string selectQuery = @"SELECT id AS userteamid FROM dbo.UserTeam WHERE id IN (" + paramNames + ");";
+
+        //            cmd.Connection = db;
+        //            cmd.CommandTimeout = 100;
+        //            cmd.CommandType = CommandType.Text;
+        //            cmd.CommandText = selectQuery;
+
+        //            //Create SqlDataAdapter and DataTable
+        //            SqlDataAdapter da = new SqlDataAdapter(cmd);
+        //            DataTable result = new DataTable();
+
+        //            // this will query your database and return the result to your datatable
+        //            da.Fill(result);
+        //            da.Dispose();
+
+        //            return result;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Error("UserTeam Repository (GetUserTeamForUserTeamIds) error: " + ex.Message);
+        //        throw ex;
+        //    }
+        //}
+
         public List<int> GetCompetedUserTeamIds(SqlConnection db)
         {
             try
             {
-                string selectQuery = @"SELECT ut.id FROM dbo.UserTeam ut INNER JOIN dbo.Gameweeks g ON ut.current_gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 100;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetCompetedUserTeamIds";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
+                    //string selectQuery = @"SELECT ut.id FROM dbo.UserTeam ut INNER JOIN dbo.Gameweeks g ON ut.current_gameweekId = g.id WHERE g.id = (SELECT TOP 1 id FROM dbo.Gameweeks WHERE deadline_time < GETDATE() ORDER BY deadline_time DESC)";
 
-                List<int> result = ReadList(reader);
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                reader.Close();
+                        reader.Close();
+                        reader.Dispose();
 
-                return result;
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -225,20 +285,38 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = "";
+                //string selectQuery = "";
 
-                if (entity == "UserTeamGameweekHistory")
+                //if (entity == "UserTeamGameweekHistory")
+                //{
+                //    selectQuery = @"SELECT MAX(gameweekId) FROM (SELECT gwf.gameweekId, MAX(gwf.kickoff_time) AS MaxKickoffTime FROM dbo.Gameweeks gw INNER JOIN dbo.GameweekFixtures gwf ON gw.id = gwf.gameweekId GROUP BY gwf.gameweekId ) t WHERE DATEADD(hh,9,CAST(CAST(DATEADD(day,1,MaxKickoffTime) AS DATE) AS DATETIME)) < GETDATE();";
+                //}
+                //else
+                //{
+                //    selectQuery = @"SELECT MAX(id) AS id FROM dbo.Gameweeks WHERE deadline_time < GETDATE();";
+                //}
+
+                using (IDbCommand cmd = db.CreateCommand())
                 {
-                    selectQuery = @"SELECT MAX(gameweekId) FROM (SELECT gwf.gameweekId, MAX(gwf.kickoff_time) AS MaxKickoffTime FROM dbo.Gameweeks gw INNER JOIN dbo.GameweekFixtures gwf ON gw.id = gwf.gameweekId GROUP BY gwf.gameweekId ) t WHERE DATEADD(hh,9,CAST(CAST(DATEADD(day,1,MaxKickoffTime) AS DATE) AS DATETIME)) < GETDATE();";
-                }
-                else
-                {
-                    selectQuery = @"SELECT MAX(id) AS id FROM dbo.Gameweeks WHERE deadline_time < GETDATE();";
-                }
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
 
-                var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 300);
+                    if (entity == "UserTeamGameweekHistory")
+                    {
+                        cmd.CommandText = "GetLatestGameweekId";
+                    }
+                    else
+                    {
+                        cmd.CommandText = "GetActualGameweekId";
+                    }
 
-                return result;
+                    int result = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 300);
+
+                    return result;
+                }
             }
             catch (Exception ex)
             {

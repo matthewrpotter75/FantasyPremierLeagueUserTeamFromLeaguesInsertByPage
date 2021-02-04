@@ -14,17 +14,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamSeason(UserTeamSeasons userTeamSeasons, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = userTeamSeasons.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
-                        bulkCopy.BatchSize = 500;
-                        bulkCopy.DestinationTableName = "UserTeamSeason";
+                        bulkCopy.BatchSize = 5000;
+                        bulkCopy.DestinationTableName = "UserTeamSeasonStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -40,13 +40,13 @@ namespace FantasyPremierLeagueUserTeams
                         //}
                     }
                 }
-
                 return rowsAffected;
             }
             catch (Exception ex)
             {
                 Logger.Error("UserTeamSeason Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -152,15 +152,30 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT uts.id FROM dbo.UserTeamSeason uts INNER JOIN dbo.UserTeam ut ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamSeasonIdsForUserTeamId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                List<int> result = ReadList(reader);
+                    //string selectQuery = @"SELECT uts.id FROM dbo.UserTeamSeason uts INNER JOIN dbo.UserTeam ut ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
 
-                reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
 
-                return result;
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -173,15 +188,30 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT uts.season_name AS name FROM dbo.UserTeamSeason uts INNER JOIN dbo.UserTeam ut ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamSeasonNamesForUserTeamId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+                    IDataParameter param = cmd.CreateParameter();
+                    param.ParameterName = "@UserTeamId";
+                    param.Value = userTeamId;
+                    cmd.Parameters.Add(param);
 
-                List<string> result = ReadListString(reader);
+                    //string selectQuery = @"SELECT uts.season_name AS name FROM dbo.UserTeamSeason uts INNER JOIN dbo.UserTeam ut ON uts.userteamid = ut.id WHERE ut.id = @UserTeamId;";
 
-                reader.Close();
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<string> result = ReadListString(reader);
 
-                return result;
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Data;
@@ -14,7 +13,9 @@ namespace FantasyPremierLeagueUserTeams
         {
             XmlConfigurator.Configure();
 
-            int pageId = 0;
+            //int pageId;
+            int pageCnt;
+            int leagueId = 314;
 
             UserTeamPicks userTeamPicksInsert = new UserTeamPicks();
             UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert = new UserTeamPickAutomaticSubs();
@@ -26,14 +27,6 @@ namespace FantasyPremierLeagueUserTeams
             UserTeamH2hLeagues userTeamH2hLeaguesInsert = new UserTeamH2hLeagues();
 
             UserTeamRepository userTeamRepository = new UserTeamRepository();
-            UserTeamPickRepository userTeamPickRepository = new UserTeamPickRepository();
-            UserTeamPickAutomaticSubRepository userTeamPickAutomaticSubRepository = new UserTeamPickAutomaticSubRepository();
-            UserTeamGameweekHistoryRepository userTeamGameweekHistoryRepository = new UserTeamGameweekHistoryRepository();
-            UserTeamChipRepository userTeamChipRepository = new UserTeamChipRepository();
-            UserTeamTransferHistoryRepository userTeamTransferHistoryRepository = new UserTeamTransferHistoryRepository();
-            UserTeamSeasonRepository userTeamSeasonRepository = new UserTeamSeasonRepository();
-            UserTeamClassicLeagueRepository userTeamClassicLeagueRepository = new UserTeamClassicLeagueRepository();
-            UserTeamH2hLeagueRepository userTeamH2hLeagueRepository = new UserTeamH2hLeagueRepository();
 
             SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString);
 
@@ -42,7 +35,8 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Out("Starting...");
                 Logger.Out("");
 
-                pageId = 1;
+                int pageId;
+                Globals.pageId = 1;
                 bool test = true;
 
                 if (args.Length == 0)
@@ -53,11 +47,16 @@ namespace FantasyPremierLeagueUserTeams
                 else
                 {
                     test = int.TryParse(args[0], out pageId);
+
                     if (test == false)
                     {
                         //System.Console.WriteLine("Arguments passed into program were not integer");
                         Logger.Out("Arguments passed into program were not integer");
                         return;
+                    }
+                    else
+                    {
+                        Globals.pageId = pageId;
                     }
                 }
 
@@ -71,31 +70,53 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     db.Open();
 
-                    int leagueId = 314;
                     bool has_next = true;
 
-                    int userTeamRetries = 0;
+                    Globals.userTeamRetries = 0;
+                    pageCnt = 0;
 
                     List<int> userTeamIds = userTeamRepository.GetAllUserTeamIds(db);
 
+					Globals.apiCalls = 0;
+					Globals.apiPageCalls = 0;
+					Globals.apiUserTeamCalls = 0;
+					Globals.apiUserTeamHistoryCalls = 0;
+					Globals.apiUserTeamTransferHistoryCalls = 0;
+					Globals.apiUserTeamPickCalls = 0;
+					Globals.userTeamInsertCount = 0;
+
                     while (has_next == true)
                     {
-                        Globals.apiCalls = 0;
-                        Globals.apiPageCalls = 0;
-                        Globals.apiUserTeamCalls = 0;
-                        Globals.apiUserTeamHistoryCalls = 0;
-                        Globals.apiUserTeamTransferHistoryCalls = 0;
-                        Globals.apiUserTeamPickCalls = 0;
-                        Globals.userTeamInsertCount = 0;
-
                         SetLatestGameweek("UserTeamGameweekHistory");
                         SetActualGameweek("UserTeamGameweekPick");
 
-                        has_next = FantasyPremierLeagueLeaguesAPIClient.GetLeagueDataJson(leagueId, pageId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamRetries, db);
+                        pageCnt += 1;
 
-                        WriteToDB(pageId, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                        if (db.State == ConnectionState.Closed)
+                        {
+                            db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString;
+                            db.Open();
+                            Logger.Error("Program Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): Reopening closed db connection");
+                        }
 
-                        pageId += 1;
+                        has_next = FantasyPremierLeagueLeaguesAPIClient.GetLeagueDataJson(leagueId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+
+                        if (pageCnt >= 50)
+                        {
+                            WriteToDB(Globals.pageId, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+							
+							Globals.apiCalls = 0;
+							Globals.apiPageCalls = 0;
+							Globals.apiUserTeamCalls = 0;
+							Globals.apiUserTeamHistoryCalls = 0;
+							Globals.apiUserTeamTransferHistoryCalls = 0;
+							Globals.apiUserTeamPickCalls = 0;
+							Globals.userTeamInsertCount = 0;
+							
+                            pageCnt = 0;
+                        }
+
+                        Globals.pageId += 1;
                     }
 
                     db.Close();
@@ -115,10 +136,15 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Error(ex.Message);
                 //Logger.Error(userTeamName + " caused error!!!");
 
-                //db.Open();
+                if (db.State == ConnectionState.Closed)
+                {
+                    db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString;
+                    db.Open();
+                    Logger.Error("Program Exception Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): Reopening closed db connection");
+                }
 
                 //If error is thrown from sub program write existing records to the DB
-                //WriteToDB(pageId, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                WriteToDB(Globals.pageId, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
 
                 //db.Close();
 
@@ -153,7 +179,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 //Write UserTeamChip to the db
                 userTeamChipRowsInserted = userTeamChipRepository.InsertUserTeamChip(userTeamChipsInsert, db);
-                Logger.Out("UserTeamChip bulk insert complete");
+                Logger.Out("UserTeamChip bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
 
                 //Write UserTeamGameweekHistory to the db
                 userTeamGameweekHistoryRowsInserted = userTeamGameweekHistoryRepository.InsertUserTeamGameweekHistories(userTeamGameweekHistoriesInsert, db);

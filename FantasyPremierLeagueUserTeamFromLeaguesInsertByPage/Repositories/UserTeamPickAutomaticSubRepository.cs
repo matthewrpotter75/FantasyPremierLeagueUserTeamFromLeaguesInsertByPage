@@ -14,17 +14,17 @@ namespace FantasyPremierLeagueUserTeams
     {
         public int InsertUserTeamPickAutomaticSubs(UserTeamPickAutomaticSubs userTeamPickAutomaticSubs, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                int rowsAffected = 0;
-
                 using (IDataReader reader = userTeamPickAutomaticSubs.GetDataReader())
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
                         bulkCopy.BulkCopyTimeout = 1000;
-                        bulkCopy.BatchSize = 500;
-                        bulkCopy.DestinationTableName = "UserTeamPickAutomaticSub";
+                        bulkCopy.BatchSize = 1000;
+                        bulkCopy.DestinationTableName = "UserTeamPickAutomaticSubStaging";
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
@@ -44,7 +44,8 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeamPickAutomaticSub Repository (insert) error: " + ex.Message);
-                throw ex;
+                return rowsAffected;
+                //throw ex;
             }
         }
 
@@ -123,15 +124,35 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                string selectQuery = @"SELECT playerid_in AS id FROM dbo.UserTeamPickAutomaticSub WHERE userteamid = @UserTeamId AND gameweekid = @GameweekId;";
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetAllUserTeamPickAutomaticSubIdsForUserTeamIdAndGameweekId";
 
-                IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId, GameweekId = gameweekId }, commandTimeout: 300);
+                    IDataParameter param1 = cmd.CreateParameter();
+                    param1.ParameterName = "@UserTeamId";
+                    param1.Value = userTeamId;
+                    cmd.Parameters.Add(param1);
 
-                List<int> result = ReadList(reader);
+                    IDataParameter param2 = cmd.CreateParameter();
+                    param2.ParameterName = "@GameweekId";
+                    param2.Value = gameweekId;
+                    cmd.Parameters.Add(param2);
 
-                reader.Close();
+                    //string selectQuery = @"SELECT playerid_in AS id FROM dbo.UserTeamPickAutomaticSub WHERE userteamid = @UserTeamId AND gameweekid = @GameweekId;";
 
-                return result;
+                    using (IDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<int> result = ReadList(reader);
+
+                        reader.Close();
+                        reader.Dispose();
+
+                        return result;
+                    }
+                }
             }
             catch (Exception ex)
             {
