@@ -14,7 +14,7 @@ namespace FantasyPremierLeagueUserTeams
     {
         #region methods
 
-        public static bool GetLeagueDataJson(int leagueId, List<int> userTeamIds, string userTeamLeaguesUrl, string userTeamUrl, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, UserTeamChips userTeamChipsInsert, UserTeamTransferHistoryData userTeamTransferHistoriesInsert, UserTeamSeasons userTeamSeasonsInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
+        public static bool GetLeagueDataJson(int leagueId, List<int> userTeamIds, string userTeamLeaguesUrl, string userTeamUrl, UserTeams userTeamsUpdateInsert, UserTeamCupMatches userTeamCupInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, UserTeamChips userTeamChipsInsert, UserTeamTransferHistoryData userTeamTransferHistoriesInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
         {
             UserTeamRepository userTeamRepository = new UserTeamRepository();
             UserTeamPickRepository userTeamPickRepository = new UserTeamPickRepository();
@@ -72,9 +72,9 @@ namespace FantasyPremierLeagueUserTeams
                             pageUserTeamIds.Add(userTeamId);
                         }
 
-                        int maxGWFromGameweekHistoryForUserTeamId;
-                        int maxGWFromPicksForUserTeamId;
-                        int maxGWFromTransferHistoryForUserTeamId;
+                        //int maxGWFromGameweekHistoryForUserTeamId;
+                        //int maxGWFromPicksForUserTeamId;
+                        //int maxGWFromTransferHistoryForUserTeamId;
 
                         using (DataTable dtUserMaxGWForUserTeamForGameweekHistory = userTeamGameweekHistoryRepository.GetMaxGameweekIdFromUserTeamGameweekHistoryForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserMaxGWForUserTeamForPicks = userTeamPickRepository.GetMaxGameweekIdFromUserTeamPickForUserTeamIds(pageUserTeamIds, db))
@@ -86,16 +86,15 @@ namespace FantasyPremierLeagueUserTeams
                             {
                                 userTeamId = teamLeaguePosition.entry;
 
-                                maxGWFromGameweekHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForGameweekHistory, "gameweekid");
-                                maxGWFromPicksForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForPicks, "gameweekid");
-                                maxGWFromTransferHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForTransferHistory, "gameweekid");
+                                Globals.maxGWFromGameweekHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForGameweekHistory, "gameweekid");
+                                Globals.maxGWFromPicksForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForPicks, "gameweekid");
+                                Globals.maxGWFromTransferHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForTransferHistory, "gameweekid");
                                 Globals.leagueCountFromUserTeamClassicLeagueForUserTeamId = GetColumnNameValue(userTeamId, dtClassicLeagueCountForUserTeam, "leagueCount");
                                 Globals.existingUserTeamId = GetColumnNameValue(userTeamId, dtUserTeam, "userteamid");
 
-                                FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, userTeamIds, maxGWFromGameweekHistoryForUserTeamId, maxGWFromPicksForUserTeamId, maxGWFromTransferHistoryForUserTeamId, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                                FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, userTeamIds, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
                             }
                         }
-
                         pageUserTeamIds.Clear();
                     }
                     return has_next;
@@ -109,7 +108,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 if (Globals.leagueRetries < 10)
                 {
-                    has_next = GetLeagueDataJson(leagueId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
+                    has_next = GetLeagueDataJson(leagueId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
                     Globals.leagueRetries += 1;
                 }
                 else

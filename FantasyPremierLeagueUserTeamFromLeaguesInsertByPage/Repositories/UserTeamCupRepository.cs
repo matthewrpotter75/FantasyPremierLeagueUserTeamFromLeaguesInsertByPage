@@ -1,30 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Configuration;
 using System.Data;
 using Dapper;
 using DapperExtensions;
-using System.Linq;
+using DataStreams.ETL;
 
 namespace FantasyPremierLeagueUserTeams
 {
     public class UserTeamCupRepository : IUserTeamCup
     {
-        public bool InsertUserTeamCup(UserTeamCupMatch cup, SqlConnection db)
+        public int InsertUserTeamCup(UserTeamCupMatches userTeamCupMatches, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                long rowsAffected = 0;
-
-                rowsAffected = db.Insert(cup);
-
-                if (rowsAffected > 0)
+                using (IDataReader reader = userTeamCupMatches.GetDataReader())
                 {
-                    Logger.Out("Cup: " + cup.entry_1_name + " v " + cup.entry_2_name + " - inserted");
-                    return true;
+                    using (var bulkCopy = new SqlBulkCopy(db))
+                    {
+                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BatchSize = 1000;
+                        bulkCopy.DestinationTableName = "UserTeamCupStaging";
+                        bulkCopy.EnableStreaming = true;
+
+                        // Add your column mappings here
+                        bulkCopy.ColumnMappings.Add("id", "id");
+                        bulkCopy.ColumnMappings.Add("entry_1_entry", "homeTeam_userTeamid");
+                        bulkCopy.ColumnMappings.Add("entry_1_name", "homeTeam_userTeamName");
+                        bulkCopy.ColumnMappings.Add("entry_1_player_name", "homeTeam_playerName");
+                        bulkCopy.ColumnMappings.Add("entry_1_points", "homeTeam_points");
+                        bulkCopy.ColumnMappings.Add("entry_1_win", "homeTeam_win");
+                        bulkCopy.ColumnMappings.Add("entry_1_draw", "homeTeam_draw");
+                        bulkCopy.ColumnMappings.Add("entry_1_loss", "homeTeam_loss");
+                        bulkCopy.ColumnMappings.Add("entry_1_total", "homeTeam_total");
+                        bulkCopy.ColumnMappings.Add("entry_2_entry", "awayTeam_userTeamid");
+                        bulkCopy.ColumnMappings.Add("entry_2_name", "awayTeam_userTeamName");
+                        bulkCopy.ColumnMappings.Add("entry_2_player_name", "awayTeam_playerName");
+                        bulkCopy.ColumnMappings.Add("entry_2_points", "awayTeam_points");
+                        bulkCopy.ColumnMappings.Add("entry_2_win", "awayTeam_win");
+                        bulkCopy.ColumnMappings.Add("entry_2_draw", "awayTeam_draw");
+                        bulkCopy.ColumnMappings.Add("entry_2_loss", "awayTeam_loss");
+                        bulkCopy.ColumnMappings.Add("entry_2_total", "awayTeam_total");
+                        bulkCopy.ColumnMappings.Add("event", "gameweekid");
+
+                        bulkCopy.ColumnMappings.Add("is_knockout", "is_knockout");
+                        bulkCopy.ColumnMappings.Add("winner", "winner");
+                        bulkCopy.ColumnMappings.Add("seed_value", "seed_value");
+                        bulkCopy.ColumnMappings.Add("fromuserteamid", "fromuserteamid");
+                        bulkCopy.ColumnMappings.Add("tiebreak", "tiebreak");
+
+                        bulkCopy.WriteToServer(reader);
+                        rowsAffected = SqlBulkCopyExtension.RowsCopiedCount(bulkCopy);
+                    }
                 }
-                return false;
+                return rowsAffected;
             }
             catch (Exception ex)
             {

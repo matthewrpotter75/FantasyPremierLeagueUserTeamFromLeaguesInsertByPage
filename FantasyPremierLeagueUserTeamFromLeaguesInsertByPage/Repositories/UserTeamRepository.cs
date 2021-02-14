@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Configuration;
 using System.Data;
 using Dapper;
 using DapperExtensions;
-using System.Linq;
+using DataStreams.ETL;
 
 namespace FantasyPremierLeagueUserTeams
 {
@@ -22,7 +21,7 @@ namespace FantasyPremierLeagueUserTeams
                 if (rowsAffected > 0)
                 {
                     Logger.Out("UserTeam: " + userTeam.name + " (" + Convert.ToString(userTeam.id) + ") - inserted");
-                    Logger.Out("");
+                    //Logger.Out("");
                     return true;
                 }
                 return false;
@@ -34,21 +33,47 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
-        public bool UpdateUserTeam(UserTeam userTeam, SqlConnection db)
+        public int UpdateUserTeam(UserTeams userTeams, SqlConnection db)
         {
+            int rowsAffected = 0;
+
             try
             {
-                bool rowsUpdated = false;
-
-                rowsUpdated = db.Update(userTeam, commandTimeout: 300);
-
-                if (rowsUpdated == true)
+                using (IDataReader reader = userTeams.GetDataReader())
                 {
-                    Logger.Out("UserTeam: " + userTeam.name + " (" + Convert.ToString(userTeam.id) + ") - updated");
-                    Logger.Out("");
-                    return true;
+                    using (var bulkCopy = new SqlBulkCopy(db))
+                    {
+                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BatchSize = 1000;
+                        bulkCopy.DestinationTableName = "UserTeamUpdateStaging";
+                        bulkCopy.EnableStreaming = true;
+
+                        // Add your column mappings here
+                        bulkCopy.ColumnMappings.Add("id", "id");
+                        bulkCopy.ColumnMappings.Add("player_first_name", "player_first_name");
+                        bulkCopy.ColumnMappings.Add("player_last_name", "player_last_name");
+                        bulkCopy.ColumnMappings.Add("player_region_id", "player_region_id");
+                        bulkCopy.ColumnMappings.Add("player_region_name", "player_region_name");
+                        bulkCopy.ColumnMappings.Add("player_region_iso_code_long", "player_region_iso_code");
+                        bulkCopy.ColumnMappings.Add("summary_overall_points", "summary_overall_points");
+                        bulkCopy.ColumnMappings.Add("summary_overall_rank", "summary_overall_rank");
+                        bulkCopy.ColumnMappings.Add("summary_event_points", "summary_gameweek_points");
+                        bulkCopy.ColumnMappings.Add("summary_event_rank", "summary_gameweek_rank");
+                        bulkCopy.ColumnMappings.Add("current_event", "current_gameweekId");
+                        bulkCopy.ColumnMappings.Add("joined_time", "joined_time");
+                        bulkCopy.ColumnMappings.Add("name", "team_name");
+                        bulkCopy.ColumnMappings.Add("last_deadline_bank", "team_bank");
+                        bulkCopy.ColumnMappings.Add("last_deadline_value", "team_value");
+                        bulkCopy.ColumnMappings.Add("last_deadline_total_transfers", "team_transfers");
+                        bulkCopy.ColumnMappings.Add("kit", "kit");
+                        bulkCopy.ColumnMappings.Add("favourite_team", "favourite_teamid");
+                        bulkCopy.ColumnMappings.Add("started_event", "started_gameweekid");
+
+                        bulkCopy.WriteToServer(reader);
+                        rowsAffected = SqlBulkCopyExtension.RowsCopiedCount(bulkCopy);
+                    }
                 }
-                return false;
+                return rowsAffected;
             }
             catch (Exception ex)
             {
@@ -138,6 +163,56 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("UserTeam Repository (GetAllUserTeamIds) error: " + ex.Message);
+                throw ex;
+            }
+        }
+
+        public int UpdateUserTeamSQL(SqlConnection db)
+        {
+            try
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    int result = 0;
+
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 1000;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "UpdateUserTeam";
+
+                    result = cmd.ExecuteNonQuery();
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeam Repository (UpdateUserTeamSQL) error: " + ex.Message);
+                throw ex;
+            }
+        }
+
+        public int TrncateUserTeamUpdateStaging(SqlConnection db)
+        {
+            try
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    int result = 0;
+                    
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 100;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "TruncateUserTeamUpdateStaging";
+
+                    result = cmd.ExecuteNonQuery();
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeam Repository (TrncateUserTeamUpdateStaging) error: " + ex.Message);
                 throw ex;
             }
         }

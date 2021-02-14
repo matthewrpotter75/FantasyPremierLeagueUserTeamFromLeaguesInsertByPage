@@ -10,7 +10,7 @@ namespace FantasyPremierLeagueUserTeams
 {
     public class FantasyPremierLeagueAPIPick
     {
-        public static void GetUserTeamPickDataJson(int userTeamId, int maxGWFromPicksForUserTeamId, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, SqlConnection db)
+        public static void GetUserTeamPickDataJson(int userTeamId, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, SqlConnection db)
         {
             int gameweekId;
 
@@ -20,24 +20,24 @@ namespace FantasyPremierLeagueUserTeams
 
             try
             {
-                if (maxGWFromPicksForUserTeamId == 0 && Globals.startGameweekId > 0)
+                if (Globals.maxGWFromPicksForUserTeamId == 0 && Globals.startGameweekId > 0)
                 {
-                    maxGWFromPicksForUserTeamId = Globals.startGameweekId;
+                    Globals.maxGWFromPicksForUserTeamId = Globals.startGameweekId;
                 }
                 else
                 {
-                    maxGWFromPicksForUserTeamId = 1;
-                }    
+                    Globals.maxGWFromPicksForUserTeamId += 1;
+                }
 
-                for (gameweekId = maxGWFromPicksForUserTeamId; gameweekId <= Globals.actualGameweek; gameweekId++)
+                for (gameweekId = Globals.maxGWFromPicksForUserTeamId; gameweekId <= Globals.actualGameweek; gameweekId++)
                 {
-                    GetUserTeamPickJson(userTeamId, gameweekId, userTeamPicksUrl, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
+                    GetUserTeamPickJson(userTeamId, gameweekId, userTeamPicksUrl, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamPickDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamPickDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamPickDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
 
@@ -86,12 +86,12 @@ namespace FantasyPremierLeagueUserTeams
         //    }
         //}
 
-        public static void GetUserTeamPickJson(int userTeamId, int gameweekId, string urlUserTeamPicks, int maxGWFromPicksForUserTeamId, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, SqlConnection db)
+        public static void GetUserTeamPickJson(int userTeamId, int gameweekId, string urlUserTeamPicks, UserTeamPicks userTeamPicksInsert, UserTeamPickAutomaticSubs userTeamPickAutomaticSubsInsert, SqlConnection db)
         {
             try
             {
                 //Process UserTeamPick and UserTeamPickAutomaticSub
-                if (gameweekId >= maxGWFromPicksForUserTeamId)
+                if (gameweekId >= Globals.maxGWFromPicksForUserTeamId)
                 {
                     UserTeamPickRepository userTeamPickRepository = new UserTeamPickRepository();
 
@@ -166,11 +166,11 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Error("GetUserTeamPickJson data exception (UserTeamId:" + userTeamId.ToString() + "/GameweekId:" + gameweekId.ToString() + "): skipping userteam/gameweek");
                 //throw new Exception("GetUserTeamPickJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //GetUserTeamPickJson(userTeamId, gameweekId, urlUserTeamPicks, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
-                if (gameweekId + 1 < Globals.actualGameweek)
-                {
-                    gameweekId++;
-                    GetUserTeamPickJson(userTeamId, gameweekId, urlUserTeamPicks, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
-                }
+                //if (gameweekId + 1 < Globals.actualGameweek)
+                //{
+                //    gameweekId++;
+                //    GetUserTeamPickJson(userTeamId, gameweekId, urlUserTeamPicks, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
+                //}
             }
         }
 
@@ -203,7 +203,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 Logger.Error("GetUserTeamPickAutomaticSubJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //throw new Exception("GetUserTeamPickAutomaticSubJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                GetUserTeamPickAutomaticSubJson(userTeamId, gameweekId, userTeamPickAutomaticSubsInsert, userTeamPickData, db);
+                //GetUserTeamPickAutomaticSubJson(userTeamId, gameweekId, userTeamPickAutomaticSubsInsert, userTeamPickData, db);
             }
         }
     }

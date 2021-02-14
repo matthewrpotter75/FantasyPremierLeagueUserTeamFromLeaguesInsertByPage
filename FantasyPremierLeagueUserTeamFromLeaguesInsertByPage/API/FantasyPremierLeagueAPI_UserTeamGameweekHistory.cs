@@ -10,8 +10,7 @@ namespace FantasyPremierLeagueUserTeams
 {
     public class FantasyPremierLeagueAPIGameweekHistory
     {
-        //public static void GetUserTeamHistoryDataJson(int userTeamId, List<int> userTeamIds, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
-        public static void GetUserTeamHistoryDataJson(int userTeamId, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
+        public static void GetUserTeamHistoryDataJson(int userTeamId, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, UserTeamChips userTeamChipsInsert, UserTeamSeasons userTeamSeasonsInsert, SqlConnection db)
         {
             try
             {
@@ -49,9 +48,9 @@ namespace FantasyPremierLeagueUserTeams
                         }
 
                         //Process UserTeamGameweekHistory
-                        if (maxGWFromGameweekHistoryForUserTeamId < Globals.latestGameweek && Globals.latestGameweek > 0)
+                        if (Globals.maxGWFromGameweekHistoryForUserTeamId < Globals.latestGameweek && Globals.latestGameweek > 0)
                         {
-                            GetUserTeamGameweekHistoryJson(userTeamId, maxGWFromGameweekHistoryForUserTeamId, userTeamHistoryData, userTeamGameweekHistoriesInsert, db);
+                            GetUserTeamGameweekHistoryJson(userTeamId, userTeamHistoryData, userTeamGameweekHistoriesInsert, db);
                         }
                     }
                     else
@@ -63,7 +62,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamHistoryDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamHistoryDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamHistoryDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
 
@@ -115,7 +114,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamChipJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamChipJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamChipJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //GetUserTeamChipJson(userTeamId, userTeamChipsInsert, userTeamHistoryData);
             }
         }
@@ -152,11 +151,11 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamSeasonJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamSeasonJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamSeasonJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }        
         }
 
-        public static void GetUserTeamGameweekHistoryJson(int userTeamId, int maxGWFromGameweekHistoryForUserTeamId, UserTeamGameweekHistoryData userTeamHistoryData, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, SqlConnection db)
+        public static void GetUserTeamGameweekHistoryJson(int userTeamId, UserTeamGameweekHistoryData userTeamHistoryData, UserTeamGameweekHistories userTeamGameweekHistoriesInsert, SqlConnection db)
         {
             //Logger.Out("GetUserTeamGameweekHistoryJson starting");
             //int gameweekId;
@@ -175,7 +174,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 foreach (UserTeamGameweekHistory userTeamGameweekHistory in userTeamHistoryData.current)
                 {
-                    if (userTeamGameweekHistory.@event > maxGWFromGameweekHistoryForUserTeamId && userTeamGameweekHistory.@event <= Globals.latestGameweek)
+                    if (userTeamGameweekHistory.@event > Globals.maxGWFromGameweekHistoryForUserTeamId && userTeamGameweekHistory.@event <= Globals.latestGameweek)
                     {
                         userTeamGameweekHistory.userteamid = userTeamId;
 
@@ -195,7 +194,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamGameweekHistoryJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamGameweekHistoryJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamGameweekHistoryJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
     }

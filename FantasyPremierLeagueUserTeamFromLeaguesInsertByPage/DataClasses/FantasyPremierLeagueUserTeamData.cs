@@ -69,8 +69,7 @@ namespace FantasyPremierLeagueUserTeams
 
     public class UserTeamClassicLeagues : List<UserTeamLeague> { }
     public class UserTeamH2hLeagues : List<UserTeamLeague> { }
-
-    public class UserTeamCupMatches : List<UserTeamMatch> { }
+    public class UserTeamCupMatches : List<UserTeamCupMatch> { }
 
     public class UserTeamClassicLeague : UserTeamLeague { };
 
@@ -130,11 +129,9 @@ namespace FantasyPremierLeagueUserTeams
         public int? seed_value { get; set; }
         public int @event { get; set; }
         public string tiebreak { get; set; }
-        [ExplicitKey]
+        //[ExplicitKey]
         public int fromuserteamid { get; set; }
     }
-
-    public class UserTeamMatch : UserTeamCupMatch { };
 
     public class UserTeamCupStatus
     {

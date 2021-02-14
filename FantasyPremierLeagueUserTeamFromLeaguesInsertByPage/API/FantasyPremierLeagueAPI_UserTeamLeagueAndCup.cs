@@ -10,8 +10,7 @@ namespace FantasyPremierLeagueUserTeams
 {
     public class FantasyPremierLeagueAPIUserTeamLeagueAndCup
     {
-        //public static void GetUserTeamJson(int userTeamId, List<int> userTeamIds, UserTeam userTeam)
-        public static void GetUserTeamLeagueAndCupJson(int userTeamId, List<int> userTeamIds, string userTeamUrl, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
+        public static void GetUserTeamLeagueAndCupJson(int userTeamId, List<int> userTeamIds, string userTeamUrl, UserTeams userTeamsUpdateInsert, UserTeamCupMatches userTeamCupInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {
             try
             {
@@ -56,7 +55,8 @@ namespace FantasyPremierLeagueUserTeams
                         }
                         else
                         {
-                            userTeamRepository.UpdateUserTeam(userTeam, db);
+                            userTeamsUpdateInsert.Add(userTeam);
+                            //userTeamRepository.UpdateUserTeam(userTeamsInsert, db);
                         }
 
                         GetUserTeamClassicLeagueJson(userTeamId, userTeamData, userTeamClassicLeaguesInsert, db);
@@ -68,7 +68,7 @@ namespace FantasyPremierLeagueUserTeams
 
                         if (userTeam.leagues.cup != null)
                         {
-                            GetUserTeamCupJson(userTeamId, userTeamData, db);
+                            GetUserTeamCupJson(userTeamId, userTeamData, userTeamCupInsert, db);
                         }
                     }
                 }
@@ -76,11 +76,11 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
 
-        public static void GetUserTeamCupJson(int userTeamId, UserTeam userTeam, SqlConnection db)
+        public static void GetUserTeamCupJson(int userTeamId, UserTeam userTeam, UserTeamCupMatches userTeamCupInsert, SqlConnection db)
         {
             try
             {
@@ -89,33 +89,35 @@ namespace FantasyPremierLeagueUserTeams
 
                 List<int> CupIds = cupRepository.GetAllCupIdsForUserId(userTeamId, db);
 
-                int cupid, gameweekid;
+                //int cupid, gameweekid;
 
                 foreach (UserTeamCupMatch match in userTeam.leagues.cup.matches)
                 {
                     match.fromuserteamid = userTeamId;
 
-                    if (!CupIds.Contains(match.id))
+                    if (!CupIds.Contains(match.id) && match.@event < Globals.latestGameweek)
                     {
-                        cupRepository.InsertUserTeamCup(match, db);
+                        //cupRepository.InsertUserTeamCup(match, db);
+                        userTeamCupInsert.Add(match);
+                        Logger.Out("Cup: " + match.entry_1_name + " v " + match.entry_2_name + " - added");
                     }
-                    else
-                    {
-                        cupRepository.UpdateUserTeamCup(match, db);
-                    }
+                    //else
+                    //{
+                    //    cupRepository.UpdateUserTeamCup(match, db);
+                    //}
 
-                    if (match.tiebreak != null)
-                    {
-                        cupid = match.id;
-                        gameweekid = match.@event;
-                        //GetUserTeamCupTiebreakJson(userTeamId, cupid, gameweekid, cup);
-                    }
+                    //if (match.tiebreak != null)
+                    //{
+                    //    cupid = match.id;
+                    //    gameweekid = match.@event;
+                    //    GetUserTeamCupTiebreakJson(userTeamId, cupid, gameweekid, cup);
+                    //}
                 }
             }
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //GetUserTeamCupJson(userTeamId, userTeamHistoryData);
             }
         }
@@ -193,7 +195,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamClassicLeagueJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamClassicLeagueJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamClassicLeagueJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
 
@@ -226,7 +228,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamH2hLeagueJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                throw new Exception("GetUserTeamH2hLeagueJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //throw new Exception("GetUserTeamH2hLeagueJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
     }
