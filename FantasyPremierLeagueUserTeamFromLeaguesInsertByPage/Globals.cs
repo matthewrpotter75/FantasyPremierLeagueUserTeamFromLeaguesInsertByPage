@@ -8,24 +8,25 @@ namespace FantasyPremierLeagueUserTeams
 {
     public class Globals
     {
-        public static int latestGameweek { get; set; }
-        public static int actualGameweek { get; set; }
-        public static int apiPageCalls { get; set; }
-        public static int apiCalls { get; set; }
-        public static int apiUserTeamCalls { get; set; }
-        public static int apiUserTeamHistoryCalls { get; set; }
-        public static int apiUserTeamPickCalls { get; set; }
-        public static int apiUserTeamTransferHistoryCalls { get; set; }
-        public static int startGameweekId { get; set; }
-        public static int leagueCountFromUserTeamClassicLeagueForUserTeamId { get; set; }
-        public static int maxGWFromGameweekHistoryForUserTeamId { get; set; }
-        public static int maxGWFromPicksForUserTeamId { get; set; }
-        public static int maxGWFromTransferHistoryForUserTeamId { get; set; }
-        public static int existingUserTeamId { get; set; }
-        public static int userTeamInsertCount { get; set; }
-        public static int pageId { get; set; }
-        public static int leagueRetries { get; set; }
-        public static int userTeamRetries { get; set; }
-        public static UserTeamCupMatches userTeamCupInsert { get; set; }
+        public static int LatestGameweek { get; set; }
+        public static int ActualGameweek { get; set; }
+        public static int ApiPageCalls { get; set; }
+        public static int ApiCalls { get; set; }
+        public static int ApiUserTeamCalls { get; set; }
+        public static int ApiUserTeamHistoryCalls { get; set; }
+        public static int ApiUserTeamPickCalls { get; set; }
+        public static int ApiUserTeamTransferHistoryCalls { get; set; }
+        public static int StartGameweekId { get; set; }
+        public static int LeagueCountFromUserTeamClassicLeagueForUserTeamId { get; set; }
+        public static int SeasonCountFromUserTeamSeasonForUserTeamId { get; set; }
+        public static int MaxGWFromGameweekHistoryForUserTeamId { get; set; }
+        public static int MaxGWFromPicksForUserTeamId { get; set; }
+        public static int MaxGWFromTransferHistoryForUserTeamId { get; set; }
+        public static int ExistingUserTeamId { get; set; }
+        public static int UserTeamInsertCount { get; set; }
+        public static int PageId { get; set; }
+        public static int LeagueRetries { get; set; }
+        public static int UserTeamRetries { get; set; }
+        public static UserTeamCupMatches UserTeamCupInsert { get; set; }
     }
 }

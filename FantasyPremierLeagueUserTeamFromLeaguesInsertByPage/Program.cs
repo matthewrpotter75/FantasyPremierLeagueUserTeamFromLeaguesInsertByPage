@@ -39,7 +39,7 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Out("");
 
                 int pageId;
-                Globals.pageId = 1;
+                Globals.PageId = 1;
                 bool test = true;
 
                 if (args.Length == 0)
@@ -59,7 +59,7 @@ namespace FantasyPremierLeagueUserTeams
                     }
                     else
                     {
-                        Globals.pageId = pageId;
+                        Globals.PageId = pageId;
                     }
                 }
 
@@ -75,18 +75,18 @@ namespace FantasyPremierLeagueUserTeams
 
                     bool has_next = true;
 
-                    Globals.userTeamRetries = 0;
+                    Globals.UserTeamRetries = 0;
                     pageCnt = 0;
 
                     List<int> userTeamIds = userTeamRepository.GetAllUserTeamIds(db);
 
-					Globals.apiCalls = 0;
-					Globals.apiPageCalls = 0;
-					Globals.apiUserTeamCalls = 0;
-					Globals.apiUserTeamHistoryCalls = 0;
-					Globals.apiUserTeamTransferHistoryCalls = 0;
-					Globals.apiUserTeamPickCalls = 0;
-					Globals.userTeamInsertCount = 0;
+					Globals.ApiCalls = 0;
+					Globals.ApiPageCalls = 0;
+					Globals.ApiUserTeamCalls = 0;
+					Globals.ApiUserTeamHistoryCalls = 0;
+					Globals.ApiUserTeamTransferHistoryCalls = 0;
+					Globals.ApiUserTeamPickCalls = 0;
+					Globals.UserTeamInsertCount = 0;
 
                     while (has_next == true)
                     {
@@ -99,27 +99,27 @@ namespace FantasyPremierLeagueUserTeams
                         {
                             db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString;
                             db.Open();
-                            Logger.Error("Program Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): Reopening closed db connection");
+                            Logger.Error("Program Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "): Reopening closed db connection");
                         }
 
                         has_next = FantasyPremierLeagueLeaguesAPIClient.GetLeagueDataJson(leagueId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
 
                         if (pageCnt >= 50)
                         {
-                            WriteToDB(Globals.pageId, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
+                            WriteToDB(Globals.PageId, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
 							
-							Globals.apiCalls = 0;
-							Globals.apiPageCalls = 0;
-							Globals.apiUserTeamCalls = 0;
-							Globals.apiUserTeamHistoryCalls = 0;
-							Globals.apiUserTeamTransferHistoryCalls = 0;
-							Globals.apiUserTeamPickCalls = 0;
-							Globals.userTeamInsertCount = 0;
+							Globals.ApiCalls = 0;
+							Globals.ApiPageCalls = 0;
+							Globals.ApiUserTeamCalls = 0;
+							Globals.ApiUserTeamHistoryCalls = 0;
+							Globals.ApiUserTeamTransferHistoryCalls = 0;
+							Globals.ApiUserTeamPickCalls = 0;
+							Globals.UserTeamInsertCount = 0;
 							
                             pageCnt = 0;
                         }
 
-                        Globals.pageId += 1;
+                        Globals.PageId += 1;
                     }
 
                     db.Close();
@@ -143,11 +143,11 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString;
                     db.Open();
-                    Logger.Error("Program Exception Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): Reopening closed db connection");
+                    Logger.Error("Program Exception Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "): Reopening closed db connection");
                 }
 
                 //If error is thrown from sub program write existing records to the DB
-                WriteToDB(Globals.pageId, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
+                WriteToDB(Globals.PageId, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
 
                 //db.Close();
 
@@ -226,7 +226,7 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Out("UserTeamCup bulk insert complete (PageId: " + Convert.ToString(pageId) + ")");
 
                 Logger.Out("");
-                Logger.Out("UserTeam: " + Convert.ToString(Globals.userTeamInsertCount) + " rows inserted");
+                Logger.Out("UserTeam: " + Convert.ToString(Globals.UserTeamInsertCount) + " rows inserted");
                 Logger.Out("UserTeamCup: " + Convert.ToString(userTeamCupRowsInserted) + " rows inserted");
                 Logger.Out("UserTeamUpdates: " + Convert.ToString(userTeamUpdateRowsInserted) + " rows inserted");
                 Logger.Out("UserTeamSeason: " + Convert.ToString(userTeamSeasonRowsInserted) + " rows inserted");
@@ -239,12 +239,12 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Out("UserTeamPickAutomaticSub: " + Convert.ToString(userTeamPickAutomaticSubsRowsInserted) + " rows inserted");
                 Logger.Out("");
 
-                Logger.Out("API Page calls: " + Convert.ToString(Globals.apiPageCalls));
-                Logger.Out("API UserTeam calls: " + Convert.ToString(Globals.apiUserTeamCalls));
-                Logger.Out("API UserTeamHistory calls: " + Convert.ToString(Globals.apiUserTeamHistoryCalls));
-                Logger.Out("API UserTeamTransferHistory calls: " + Convert.ToString(Globals.apiUserTeamTransferHistoryCalls));
-                Logger.Out("API UserTeamPick calls: " + Convert.ToString(Globals.apiUserTeamPickCalls));
-                Logger.Out("API calls: " + Convert.ToString(Globals.apiCalls));
+                Logger.Out("API Page calls: " + Convert.ToString(Globals.ApiPageCalls));
+                Logger.Out("API UserTeam calls: " + Convert.ToString(Globals.ApiUserTeamCalls));
+                Logger.Out("API UserTeamHistory calls: " + Convert.ToString(Globals.ApiUserTeamHistoryCalls));
+                Logger.Out("API UserTeamTransferHistory calls: " + Convert.ToString(Globals.ApiUserTeamTransferHistoryCalls));
+                Logger.Out("API UserTeamPick calls: " + Convert.ToString(Globals.ApiUserTeamPickCalls));
+                Logger.Out("API calls: " + Convert.ToString(Globals.ApiCalls));
                 Logger.Out("");
 
                 userTeamsUpdateInsert.Clear();
@@ -276,7 +276,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 latestGameweek = userTeamRepository.GetLatestGameweekId(db, entity);
 
-                Globals.latestGameweek = latestGameweek;
+                Globals.LatestGameweek = latestGameweek;
 
                 db.Close();
             }
@@ -293,7 +293,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 latestGameweek = userTeamRepository.GetLatestGameweekId(db, entity);
 
-                Globals.actualGameweek = latestGameweek;
+                Globals.ActualGameweek = latestGameweek;
 
                 db.Close();
             }

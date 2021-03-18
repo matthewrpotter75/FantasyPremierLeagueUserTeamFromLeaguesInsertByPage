@@ -21,6 +21,7 @@ namespace FantasyPremierLeagueUserTeams
             UserTeamGameweekHistoryRepository userTeamGameweekHistoryRepository = new UserTeamGameweekHistoryRepository();
             UserTeamTransferHistoryRepository userTeamTransferHistoryRepository = new UserTeamTransferHistoryRepository();
             UserTeamClassicLeagueRepository userTeamClassicLeagueRepository = new UserTeamClassicLeagueRepository();
+            UserTeamSeasonRepository userTeamSeasonRepository = new UserTeamSeasonRepository();
 
             try
             {
@@ -28,17 +29,19 @@ namespace FantasyPremierLeagueUserTeams
                 bool has_next = false;
                 List<int> leagueUserTeamIds = new List<int>();
 
-                string url = string.Format(userTeamLeaguesUrl, leagueId, Globals.pageId);
+                string url = string.Format(userTeamLeaguesUrl, leagueId, Globals.PageId);
 
-                HttpClient client = new HttpClient();
-                JsonSerializer serializer = new JsonSerializer();
+                JsonSerializer serializer = new JsonSerializer() { Formatting = Formatting.None };
+
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                using (HttpClient client = new HttpClient())
                 using (Stream s = client.GetStreamAsync(url).Result)
                 using (StreamReader sr = new StreamReader(s))
                 using (JsonReader reader = new JsonTextReader(sr))
                 {
-                    Globals.apiCalls += 1;
-                    Globals.apiPageCalls += 1;
+                    Globals.ApiCalls += 1;
+                    Globals.ApiPageCalls += 1;
 
                     // read the json from a stream
                     // json size doesn't matter because only a small piece is read at a time from the HTTP request
@@ -52,14 +55,14 @@ namespace FantasyPremierLeagueUserTeams
                         string leagueName = league.name;
                         has_next = standings.has_next;
 
-                        Logger.Out(leagueName + " (" + Convert.ToString(leagueId) + "): Page " + Convert.ToString(Globals.pageId));
+                        Logger.Out(leagueName + " (" + Convert.ToString(leagueId) + "): Page " + Convert.ToString(Globals.PageId));
                         Logger.Out("");
 
                         if (db.State == ConnectionState.Closed)
                         {
                             db.ConnectionString = ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString;
                             db.Open();
-                            Logger.Error("GetLeagueDataJson Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): Reopening closed db connection");
+                            Logger.Error("GetLeagueDataJson Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "): Reopening closed db connection");
                         }
 
                         List<int> pageUserTeamIds = new List<int>();
@@ -72,25 +75,23 @@ namespace FantasyPremierLeagueUserTeams
                             pageUserTeamIds.Add(userTeamId);
                         }
 
-                        //int maxGWFromGameweekHistoryForUserTeamId;
-                        //int maxGWFromPicksForUserTeamId;
-                        //int maxGWFromTransferHistoryForUserTeamId;
-
                         using (DataTable dtUserMaxGWForUserTeamForGameweekHistory = userTeamGameweekHistoryRepository.GetMaxGameweekIdFromUserTeamGameweekHistoryForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserMaxGWForUserTeamForPicks = userTeamPickRepository.GetMaxGameweekIdFromUserTeamPickForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserMaxGWForUserTeamForTransferHistory = userTeamTransferHistoryRepository.GetMaxGameweekIdFromUserTeamTransferHistoryForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtClassicLeagueCountForUserTeam = userTeamClassicLeagueRepository.GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds(pageUserTeamIds, db))
+                        using (DataTable dtSeasonCountForUserTeam = userTeamSeasonRepository.GetSeasonCountFromUserTeamSeasonForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserTeam = userTeamRepository.GetUserTeamForUserTeamIds(pageUserTeamIds, db))
                         {
                             foreach (TeamLeaguePosition teamLeaguePosition in standings.results)
                             {
                                 userTeamId = teamLeaguePosition.entry;
 
-                                Globals.maxGWFromGameweekHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForGameweekHistory, "gameweekid");
-                                Globals.maxGWFromPicksForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForPicks, "gameweekid");
-                                Globals.maxGWFromTransferHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForTransferHistory, "gameweekid");
-                                Globals.leagueCountFromUserTeamClassicLeagueForUserTeamId = GetColumnNameValue(userTeamId, dtClassicLeagueCountForUserTeam, "leagueCount");
-                                Globals.existingUserTeamId = GetColumnNameValue(userTeamId, dtUserTeam, "userteamid");
+                                Globals.MaxGWFromGameweekHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForGameweekHistory, "gameweekid");
+                                Globals.MaxGWFromPicksForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForPicks, "gameweekid");
+                                Globals.MaxGWFromTransferHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForTransferHistory, "gameweekid");
+                                Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId = GetColumnNameValue(userTeamId, dtClassicLeagueCountForUserTeam, "leagueCount");
+                                Globals.SeasonCountFromUserTeamSeasonForUserTeamId = GetColumnNameValue(userTeamId, dtSeasonCountForUserTeam, "seasonCount");
+                                Globals.ExistingUserTeamId = GetColumnNameValue(userTeamId, dtUserTeam, "userteamid");
 
                                 FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, userTeamIds, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
                             }
@@ -102,21 +103,21 @@ namespace FantasyPremierLeagueUserTeams
             }
             catch (Exception ex)
             {
-                Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): " + ex.Message);
+                Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "): " + ex.Message);
 
                 bool has_next = true;
 
-                if (Globals.leagueRetries < 10)
+                if (Globals.LeagueRetries < 10)
                 {
                     has_next = GetLeagueDataJson(leagueId, userTeamIds, userTeamLeaguesUrl, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
-                    Globals.leagueRetries += 1;
+                    Globals.LeagueRetries += 1;
                 }
                 else
                 {
                     Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + "):  League/Page doesn't exist skipping to next!!!");
                     //Program.WriteToDB(pageId, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
-                    Globals.leagueRetries = 0;
-                    throw new Exception("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.pageId.ToString() + "): " + ex.Message);
+                    Globals.LeagueRetries = 0;
+                    throw new Exception("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "): " + ex.Message);
                 }
 
                 return has_next;

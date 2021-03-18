@@ -18,15 +18,17 @@ namespace FantasyPremierLeagueUserTeams
 
                 userTeamTransferUrl = string.Format(userTeamTransferUrl, userTeamId);
 
-                HttpClient client = new HttpClient();
-                JsonSerializer serializer = new JsonSerializer();
+                JsonSerializer serializer = new JsonSerializer() { Formatting = Formatting.None };
+                
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                using (HttpClient client = new HttpClient())
                 using (Stream s = client.GetStreamAsync(userTeamTransferUrl).Result)
                 using (StreamReader sr = new StreamReader(s))
                 using (JsonReader reader = new JsonTextReader(sr))
                 {
-                    Globals.apiCalls += 1;
-                    Globals.apiUserTeamTransferHistoryCalls += 1;
+                    Globals.ApiCalls += 1;
+                    Globals.ApiUserTeamTransferHistoryCalls += 1;
 
                     // read the json from a stream
                     // json size doesn't matter because only a small piece is read at a time from the HTTP request
@@ -52,7 +54,8 @@ namespace FantasyPremierLeagueUserTeams
             {
                 UserTeamTransferHistoryRepository userTeamTransferHistoryRepository = new UserTeamTransferHistoryRepository();
 
-                List<long> UserTeamTransferHistoryIds = userTeamTransferHistoryRepository.GetAllUserTeamTransferHistoryIdsForUserTeamId(userTeamId, db);
+                //List<long> UserTeamTransferHistoryIds = userTeamTransferHistoryRepository.GetAllUserTeamTransferHistoryIdsForUserTeamId(userTeamId, db);
+
                 long userTeamIdForKey;
                 long elementinForKey;
                 long elementoutForKey;
@@ -66,7 +69,8 @@ namespace FantasyPremierLeagueUserTeams
                     elementoutForKey = userTeamTransferHistory.element_out;
                     userTeamTransferHistory.userteamtransferhistoryid = userTeamIdForKey + elementinForKey + elementoutForKey;
 
-                    if (!UserTeamTransferHistoryIds.Contains(userTeamTransferHistory.userteamtransferhistoryid) && !userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory))
+                    //if (!UserTeamTransferHistoryIds.Contains(userTeamTransferHistory.userteamtransferhistoryid) && !userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory))
+                    if (!userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory))
                     {
                         userTeamTransferHistoriesInsert.Add(userTeamTransferHistory);
                     }

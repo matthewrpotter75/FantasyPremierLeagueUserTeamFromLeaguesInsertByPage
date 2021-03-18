@@ -18,15 +18,17 @@ namespace FantasyPremierLeagueUserTeams
 
                 userTeamHistoryUrl = string.Format(userTeamHistoryUrl, userTeamId);
 
-                HttpClient client = new HttpClient();
-                JsonSerializer serializer = new JsonSerializer();
+                JsonSerializer serializer = new JsonSerializer() { Formatting = Formatting.None };
+
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                using (HttpClient client = new HttpClient())
                 using (Stream s = client.GetStreamAsync(userTeamHistoryUrl).Result)
                 using (StreamReader sr = new StreamReader(s))
                 using (JsonReader reader = new JsonTextReader(sr))
                 {
-                    Globals.apiCalls += 1;
-                    Globals.apiUserTeamHistoryCalls += 1;
+                    Globals.ApiCalls += 1;
+                    Globals.ApiUserTeamHistoryCalls += 1;
 
                     // read the json from a stream
                     // json size doesn't matter because only a small piece is read at a time from the HTTP request
@@ -41,14 +43,13 @@ namespace FantasyPremierLeagueUserTeams
                         }
 
                         //Process UserTeamSeasonHistory
-                        //if (userTeamHistoryData.past != null && !userTeamIds.Contains(userTeamId))
                         if (userTeamHistoryData.past != null)
                         {
                             GetUserTeamSeasonJson(userTeamId, userTeamHistoryData, userTeamSeasonsInsert, db);
                         }
 
                         //Process UserTeamGameweekHistory
-                        if (Globals.maxGWFromGameweekHistoryForUserTeamId < Globals.latestGameweek && Globals.latestGameweek > 0)
+                        if (Globals.MaxGWFromGameweekHistoryForUserTeamId < Globals.LatestGameweek && Globals.LatestGameweek > 0)
                         {
                             GetUserTeamGameweekHistoryJson(userTeamId, userTeamHistoryData, userTeamGameweekHistoriesInsert, db);
                         }
@@ -75,10 +76,8 @@ namespace FantasyPremierLeagueUserTeams
                 //Load UserTeamChip data
                 UserTeamChipRepository userTeamChipRepository = new UserTeamChipRepository();
 
-                List<UserTeamChipId> userTeamChipIds = new List<UserTeamChipId>();
-
-                //List<UserTeamChipId> userTeamChipIds = userTeamChipRepository.GetAllUserTeamChipIdsForUserTeamId(userTeamId, db);
-                userTeamChipIds = userTeamChipRepository.GetAllUserTeamChipIdsForUserTeamId(userTeamId, db);
+                //List<UserTeamChipId> userTeamChipIds = new List<UserTeamChipId>();
+                //userTeamChipIds = userTeamChipRepository.GetAllUserTeamChipIdsForUserTeamId(userTeamId, db);
 
                 foreach (UserTeamChip userTeamChip in userTeamHistoryData.chips)
                 {
@@ -100,7 +99,8 @@ namespace FantasyPremierLeagueUserTeams
                     userTeamChipId.gameweekid = userTeamChip.@event;
                     userTeamChipId.chipid = userTeamChip.chip;
 
-                    if (!userTeamChipIds.Contains(userTeamChipId) && !userTeamChipsInsert.Contains(userTeamChip))
+                    //if (!userTeamChipIds.Contains(userTeamChipId) && !userTeamChipsInsert.Contains(userTeamChip))
+                    if (!userTeamChipsInsert.Contains(userTeamChip))
                     {
                         userTeamChipsInsert.Add(userTeamChip);
                     }
@@ -174,7 +174,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 foreach (UserTeamGameweekHistory userTeamGameweekHistory in userTeamHistoryData.current)
                 {
-                    if (userTeamGameweekHistory.@event > Globals.maxGWFromGameweekHistoryForUserTeamId && userTeamGameweekHistory.@event <= Globals.latestGameweek)
+                    if (userTeamGameweekHistory.@event > Globals.MaxGWFromGameweekHistoryForUserTeamId && userTeamGameweekHistory.@event <= Globals.LatestGameweek)
                     {
                         userTeamGameweekHistory.userteamid = userTeamId;
 

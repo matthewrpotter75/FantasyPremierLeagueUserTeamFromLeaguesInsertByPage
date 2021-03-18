@@ -20,16 +20,16 @@ namespace FantasyPremierLeagueUserTeams
 
             try
             {
-                if (Globals.maxGWFromPicksForUserTeamId == 0 && Globals.startGameweekId > 0)
+                if (Globals.MaxGWFromPicksForUserTeamId == 0 && Globals.StartGameweekId > 0)
                 {
-                    Globals.maxGWFromPicksForUserTeamId = Globals.startGameweekId;
+                    Globals.MaxGWFromPicksForUserTeamId = Globals.StartGameweekId;
                 }
                 else
                 {
-                    Globals.maxGWFromPicksForUserTeamId += 1;
+                    Globals.MaxGWFromPicksForUserTeamId += 1;
                 }
 
-                for (gameweekId = Globals.maxGWFromPicksForUserTeamId; gameweekId <= Globals.actualGameweek; gameweekId++)
+                for (gameweekId = Globals.MaxGWFromPicksForUserTeamId; gameweekId <= Globals.ActualGameweek; gameweekId++)
                 {
                     GetUserTeamPickJson(userTeamId, gameweekId, userTeamPicksUrl, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
                 }
@@ -63,8 +63,8 @@ namespace FantasyPremierLeagueUserTeams
         //        using (StreamReader srUserTeamPicks = new StreamReader(sUserTeamPicks))
         //        using (JsonReader readerUserTeamPicks = new JsonTextReader(srUserTeamPicks))
         //        {
-        //            Globals.apiCalls += 1;
-        //            Globals.apiUserTeamPickCalls += 1;
+        //            Globals.ApiCalls += 1;
+        //            Globals.ApiUserTeamPickCalls += 1;
 
         //            // read the json from a stream
         //            // json size doesn't matter because only a small piece is read at a time from the HTTP request
@@ -91,21 +91,23 @@ namespace FantasyPremierLeagueUserTeams
             try
             {
                 //Process UserTeamPick and UserTeamPickAutomaticSub
-                if (gameweekId >= Globals.maxGWFromPicksForUserTeamId)
+                if (gameweekId >= Globals.MaxGWFromPicksForUserTeamId)
                 {
                     UserTeamPickRepository userTeamPickRepository = new UserTeamPickRepository();
 
                     urlUserTeamPicks = string.Format(urlUserTeamPicks, userTeamId, gameweekId);
 
-                    HttpClient clientUserTeamPicks = new HttpClient();
-                    JsonSerializer serializerUserTeamPicks = new JsonSerializer();
+                    JsonSerializer serializerUserTeamPicks = new JsonSerializer() { Formatting = Formatting.None };
+
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                    using (HttpClient clientUserTeamPicks = new HttpClient())
                     using (Stream sUserTeamPicks = clientUserTeamPicks.GetStreamAsync(urlUserTeamPicks).Result)
                     using (StreamReader srUserTeamPicks = new StreamReader(sUserTeamPicks))
                     using (JsonReader readerUserTeamPicks = new JsonTextReader(srUserTeamPicks))
                     {
-                        Globals.apiCalls += 1;
-                        Globals.apiUserTeamPickCalls += 1;
+                        Globals.ApiCalls += 1;
+                        Globals.ApiUserTeamPickCalls += 1;
 
                         // read the json from a stream
                         // json size doesn't matter because only a small piece is read at a time from the HTTP request
@@ -121,7 +123,7 @@ namespace FantasyPremierLeagueUserTeams
                             //userTeamPickId.userteamid = userTeamId;
                             //userTeamPickId.gameweekid = gameweekId;
 
-                            List<UserTeamPickId> userTeamPickIds = userTeamPickRepository.GetAllUserTeamPickIdsForUserTeamIdAndGameweekId(userTeamId, gameweekId, db);
+                            ///List<UserTeamPickId> userTeamPickIds = userTeamPickRepository.GetAllUserTeamPickIdsForUserTeamIdAndGameweekId(userTeamId, gameweekId, db);
 
                             //if (userTeamPickIds.Count > 0)
                             //{
@@ -144,7 +146,8 @@ namespace FantasyPremierLeagueUserTeams
                                 userTeamPick.userteamid = userTeamId;
                                 userTeamPick.gameweekid = gameweekId;
 
-                                if (!userTeamPickIds.Contains(userTeamPickId) && !userTeamPicksInsert.Contains(userTeamPick))
+                                //if (!userTeamPickIds.Contains(userTeamPickId) && !userTeamPicksInsert.Contains(userTeamPick))
+                                if (!userTeamPicksInsert.Contains(userTeamPick))
                                 {
                                     userTeamPicksInsert.Add(userTeamPick);
                                 }
@@ -166,7 +169,7 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Error("GetUserTeamPickJson data exception (UserTeamId:" + userTeamId.ToString() + "/GameweekId:" + gameweekId.ToString() + "): skipping userteam/gameweek");
                 //throw new Exception("GetUserTeamPickJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //GetUserTeamPickJson(userTeamId, gameweekId, urlUserTeamPicks, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
-                //if (gameweekId + 1 < Globals.actualGameweek)
+                //if (gameweekId + 1 < Globals.ActualGameweek)
                 //{
                 //    gameweekId++;
                 //    GetUserTeamPickJson(userTeamId, gameweekId, urlUserTeamPicks, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
@@ -183,12 +186,13 @@ namespace FantasyPremierLeagueUserTeams
                 //Load UserTeamPickAutomaticSub data
                 UserTeamPickAutomaticSubRepository userTeamPickAutomaticSubRepository = new UserTeamPickAutomaticSubRepository();
 
-                List<int> UserTeamPickAutomaticSubIds = userTeamPickAutomaticSubRepository.GetAllUserTeamPickAutomaticSubIdsForUserTeamIdAndGameweekId(userTeamId, gameweekId, db);
+                //List<int> UserTeamPickAutomaticSubIds = userTeamPickAutomaticSubRepository.GetAllUserTeamPickAutomaticSubIdsForUserTeamIdAndGameweekId(userTeamId, gameweekId, db);
 
                 foreach (UserTeamPickAutomaticSub userTeamPickAutomaticSub in userTeamPickData.automatic_subs)
                 {
                     //needed if want to assign value from parent to add into db table
-                    if (!UserTeamPickAutomaticSubIds.Contains(userTeamPickAutomaticSub.element_in) && !userTeamPickAutomaticSubsInsert.Contains(userTeamPickAutomaticSub))
+                    //if (!UserTeamPickAutomaticSubIds.Contains(userTeamPickAutomaticSub.element_in) && !userTeamPickAutomaticSubsInsert.Contains(userTeamPickAutomaticSub))
+                    if (!userTeamPickAutomaticSubsInsert.Contains(userTeamPickAutomaticSub))
                     {
                         userTeamPickAutomaticSubsInsert.Add(userTeamPickAutomaticSub);
                     }

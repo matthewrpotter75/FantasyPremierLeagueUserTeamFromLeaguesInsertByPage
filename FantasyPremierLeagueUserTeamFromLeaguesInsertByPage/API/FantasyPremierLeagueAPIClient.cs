@@ -11,7 +11,7 @@ namespace FantasyPremierLeagueUserTeams
             try
             {
                 //Process UserTeam, UserTeamClassicLeague, UserTeamH2hLeague, UserTeamCup
-                ////if (Globals.existingUserTeamId == 0 || Globals.leagueCountFromUserTeamClassicLeagueForUserTeamId == 0)
+                ////if (Globals.ExistingUserTeamId == 0 || Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId == 0)
                 //{
                     FantasyPremierLeagueAPIUserTeamLeagueAndCup.GetUserTeamLeagueAndCupJson(userTeamId, userTeamIds, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, db);
                 //}
@@ -21,20 +21,20 @@ namespace FantasyPremierLeagueUserTeams
                 //}
 
                 //Process UserTeamGameweekHistory, UserTeamChip, UserTeamSeasonHistory
-                if (Globals.maxGWFromGameweekHistoryForUserTeamId < Globals.latestGameweek)
+                if (Globals.MaxGWFromGameweekHistoryForUserTeamId < Globals.LatestGameweek)
                 {
                     FantasyPremierLeagueAPIGameweekHistory.GetUserTeamHistoryDataJson(userTeamId, userTeamGameweekHistoriesInsert, userTeamChipsInsert, userTeamSeasonsInsert, db);
                 }
 
                 //Process UserTeamPick, UserTeamPickAutomaticSub
                 //Doesn't check UserTeamPickAutomaticSub - which will be missing if run during an active Gameweek - matches are in progress or before have been played)
-                if (Globals.maxGWFromPicksForUserTeamId < Globals.actualGameweek && Globals.actualGameweek > 0)
+                if (Globals.MaxGWFromPicksForUserTeamId < Globals.ActualGameweek && Globals.ActualGameweek > 0)
                 {
                     FantasyPremierLeagueAPIPick.GetUserTeamPickDataJson(userTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
                 }
 
                 //Process UserTeamTransferHistory
-                if (Globals.maxGWFromTransferHistoryForUserTeamId < Globals.actualGameweek && Globals.actualGameweek > 0)
+                if (Globals.MaxGWFromTransferHistoryForUserTeamId < Globals.ActualGameweek && Globals.ActualGameweek > 0)
                 {
                     FantasyPremierLeagueAPITransferHistory.GetUserTeamTransferHistoryDataJson(userTeamId, userTeamTransferHistoriesInsert, db);
                 }
@@ -45,9 +45,9 @@ namespace FantasyPremierLeagueUserTeams
             {
                 Logger.Error("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //throw new Exception("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                if (Globals.userTeamRetries < 10)
+                if (Globals.UserTeamRetries < 10)
                 {
-                    Globals.userTeamRetries += 1;
+                    Globals.UserTeamRetries += 1;
                     GetUserTeamDataJson(userTeamId, userTeamIds, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
                 }
                 else

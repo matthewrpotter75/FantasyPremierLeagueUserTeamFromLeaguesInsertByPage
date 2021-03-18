@@ -238,7 +238,7 @@ namespace FantasyPremierLeagueUserTeams
 
                     if (parameterCount < 50)
                     {
-                        for (i = parameterCount + 1; i <= 50; i++)
+                        for (i = parameterCount + 1; i <= 60; i++)
                         {
                             name = "@UserTeamId" + i++;
                             cmd.Parameters.AddWithValue(name, 0);

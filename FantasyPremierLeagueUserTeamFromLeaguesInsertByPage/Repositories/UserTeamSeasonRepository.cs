@@ -237,6 +237,56 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
+        public DataTable GetSeasonCountFromUserTeamSeasonForUserTeamIds(List<int> userTeamIds, SqlConnection db)
+        {
+            try
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    List<string> sqlParams = new List<string>();
+
+                    int i = 1;
+                    var name = "";
+                    foreach (var userTeamId in userTeamIds)
+                    {
+                        name = "@UserTeamId" + i++;
+                        cmd.Parameters.AddWithValue(name, userTeamId);
+                    }
+
+                    int parameterCount = cmd.Parameters.Count;
+
+                    if (parameterCount < 50)
+                    {
+                        for (i = parameterCount + 1; i <= 60; i++)
+                        {
+                            name = "@UserTeamId" + i++;
+                            cmd.Parameters.AddWithValue(name, 0);
+                        }
+                    }
+
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 300;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "GetSeasonCountFromUserTeamSeasonForUserTeamIds";
+
+                    //Create SqlDataAdapter and DataTable
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable result = new DataTable();
+
+                    // this will query your database and return the result to your datatable
+                    da.Fill(result);
+                    da.Dispose();
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeamClassicLeague Repository (GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds) error: " + ex.Message);
+                throw ex;
+            }
+        }
+
         //public List<int> GetCompetedUserTeamSeasonIds(SqlConnection db)
         //{
         //    //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
