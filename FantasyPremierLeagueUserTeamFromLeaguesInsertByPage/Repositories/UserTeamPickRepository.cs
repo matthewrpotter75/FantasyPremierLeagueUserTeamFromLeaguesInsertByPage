@@ -21,7 +21,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 1000;
                         bulkCopy.DestinationTableName = "UserTeamPickStaging";
                         bulkCopy.EnableStreaming = true;
@@ -58,7 +58,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 bool rowsUpdated = false;
 
-                rowsUpdated = db.Update(userTeamPick);
+                rowsUpdated = db.Update(userTeamPick, commandTimeout: 0);
 
                 if (rowsUpdated == true)
                 {

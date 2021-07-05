@@ -25,8 +25,19 @@ namespace FantasyPremierLeagueUserTeams
         public static int ExistingUserTeamId { get; set; }
         public static int UserTeamInsertCount { get; set; }
         public static int PageId { get; set; }
+        public static int InsertInterval { get; set; }
         public static int LeagueRetries { get; set; }
         public static int UserTeamRetries { get; set; }
         public static UserTeamCupMatches UserTeamCupInsert { get; set; }
+        public static int UserTeamUpdateRowsInserted { get; set; }
+        public static int UserTeamPickRowsInserted { get; set; }
+        public static int UserTeamPickAutomaticSubsRowsInserted { get; set; }
+        public static int UserTeamGameweekHistoryRowsInserted { get; set; }
+        public static int UserTeamChipRowsInserted { get; set; }
+        public static int UserTeamTransferHistoryRowsInserted { get; set; }
+        public static int UserTeamSeasonRowsInserted { get; set; }
+        public static int UserTeamClassicLeagueRowsInserted { get; set; }
+        public static int UserTeamH2hLeagueRowsInserted { get; set; }
+        public static int UserTeamCupRowsInserted { get; set; }
     }
 }

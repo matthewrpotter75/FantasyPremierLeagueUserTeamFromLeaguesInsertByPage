@@ -61,7 +61,10 @@ namespace FantasyPremierLeagueUserTeams
                             //userTeamRepository.UpdateUserTeam(userTeamsInsert, db);
                         }
 
-                        GetUserTeamClassicLeagueJson(userTeamId, userTeamData, userTeamClassicLeaguesInsert, db);
+                        if (userTeamData.leagues.classic.Count != Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId)
+                        {
+                            GetUserTeamClassicLeagueJson(userTeamId, userTeamData, userTeamClassicLeaguesInsert, db);
+                        }
 
                         if (userTeam.leagues.h2h != null)
                         {

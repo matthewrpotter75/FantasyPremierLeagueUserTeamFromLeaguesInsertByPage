@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
@@ -53,6 +54,7 @@ namespace FantasyPremierLeagueUserTeams
                 else
                 {
                     Logger.Error("GetUserTeamDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): Issue processing User Team skipping to next!!!");
+                    Thread.Sleep(20000);
                 }
             }
         }

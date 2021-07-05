@@ -22,7 +22,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 1000;
                         bulkCopy.DestinationTableName = "UserTeamPickAutomaticSubStaging";
                         bulkCopy.EnableStreaming = true;
@@ -55,7 +55,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 bool rowsUpdated = false;
 
-                rowsUpdated = db.Update(userTeamPickAutomaticSub, commandTimeout: 300);
+                rowsUpdated = db.Update(userTeamPickAutomaticSub, commandTimeout: 0);
 
                 if (rowsUpdated == true)
                 {
@@ -127,7 +127,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamPickAutomaticSubIdsForUserTeamIdAndGameweekId";
 

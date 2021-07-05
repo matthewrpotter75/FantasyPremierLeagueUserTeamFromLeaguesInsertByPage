@@ -16,7 +16,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 long rowsAffected = 0;
 
-                rowsAffected = db.Insert(userTeam, commandTimeout: 300);
+                rowsAffected = db.Insert(userTeam, commandTimeout: 0);
 
                 if (rowsAffected > 0)
                 {
@@ -43,7 +43,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 1000;
                         bulkCopy.DestinationTableName = "UserTeamUpdateStaging";
                         bulkCopy.EnableStreaming = true;
@@ -143,7 +143,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 100;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeams";
 
@@ -176,7 +176,7 @@ namespace FantasyPremierLeagueUserTeams
                     int result = 0;
 
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 1000;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "UpdateUserTeam";
 
@@ -192,7 +192,7 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
-        public int TrncateUserTeamUpdateStaging(SqlConnection db)
+        public int TruncateUserTeamUpdateStaging(SqlConnection db)
         {
             try
             {
@@ -201,7 +201,7 @@ namespace FantasyPremierLeagueUserTeams
                     int result = 0;
                     
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 100;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "TruncateUserTeamUpdateStaging";
 
@@ -221,7 +221,7 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             {
-                var userTeam = db.Get<UserTeam>(userTeamId, commandTimeout: 300);
+                var userTeam = db.Get<UserTeam>(userTeamId, commandTimeout: 0);
 
                 string userTeamName = userTeam.name;
 
@@ -260,7 +260,7 @@ namespace FantasyPremierLeagueUserTeams
                     }
 
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 100;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetUserTeamIdForUserTeamIdsFromUserTeam";
 
@@ -303,7 +303,7 @@ namespace FantasyPremierLeagueUserTeams
         //            string selectQuery = @"SELECT id AS userteamid FROM dbo.UserTeam WHERE id IN (" + paramNames + ");";
 
         //            cmd.Connection = db;
-        //            cmd.CommandTimeout = 100;
+        //            cmd.CommandTimeout = 0;
         //            cmd.CommandType = CommandType.Text;
         //            cmd.CommandText = selectQuery;
 
@@ -332,7 +332,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 100;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetCompetedUserTeamIds";
 
@@ -374,7 +374,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     if (entity == "UserTeamGameweekHistory")
@@ -388,7 +388,7 @@ namespace FantasyPremierLeagueUserTeams
 
                     int result = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 300);
+                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 0);
 
                     return result;
                 }

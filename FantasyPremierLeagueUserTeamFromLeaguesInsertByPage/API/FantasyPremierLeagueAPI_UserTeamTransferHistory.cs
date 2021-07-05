@@ -70,7 +70,7 @@ namespace FantasyPremierLeagueUserTeams
                     userTeamTransferHistory.userteamtransferhistoryid = userTeamIdForKey + elementinForKey + elementoutForKey;
 
                     //if (!UserTeamTransferHistoryIds.Contains(userTeamTransferHistory.userteamtransferhistoryid) && !userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory))
-                    if (!userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory))
+                    if (!userTeamTransferHistoriesInsert.Contains(userTeamTransferHistory) && userTeamTransferHistory.@event > Globals.MaxGWFromTransferHistoryForUserTeamId)
                     {
                         userTeamTransferHistoriesInsert.Add(userTeamTransferHistory);
                     }

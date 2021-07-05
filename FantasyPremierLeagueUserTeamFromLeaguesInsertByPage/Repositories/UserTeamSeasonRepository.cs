@@ -22,7 +22,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 5000;
                         bulkCopy.DestinationTableName = "UserTeamSeasonStaging";
                         bulkCopy.EnableStreaming = true;
@@ -58,7 +58,7 @@ namespace FantasyPremierLeagueUserTeams
 
         //        //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
         //        //{
-        //            rowsAffected = db.Insert(userTeamSeasonsInsert, commandTimeout: 300);
+        //            rowsAffected = db.Insert(userTeamSeasonsInsert, commandTimeout: 0);
         //        //}
 
         //        //if (rowsAffected > 0)
@@ -81,7 +81,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 bool rowsUpdated = false;
 
-                rowsUpdated = db.Update(userTeamSeason, commandTimeout: 300);
+                rowsUpdated = db.Update(userTeamSeason, commandTimeout: 0);
 
                 if (rowsUpdated == true)
                 {

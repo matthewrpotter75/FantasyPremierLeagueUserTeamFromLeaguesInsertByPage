@@ -21,7 +21,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 500;
                         bulkCopy.DestinationTableName = "UserTeamChipStaging";
                         bulkCopy.EnableStreaming = true;
@@ -81,7 +81,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 bool rowsUpdated = false;
 
-                rowsUpdated = db.Update(userTeamChip, commandTimeout: 300);
+                rowsUpdated = db.Update(userTeamChip, commandTimeout: 0);
 
                 if (rowsUpdated == true)
                 {
@@ -154,7 +154,7 @@ namespace FantasyPremierLeagueUserTeams
         //    {
         //        string selectQuery = @"SELECT chipid FROM dbo.UserTeamChip WHERE UserTeamId = @UserTeamId;";
 
-        //        IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+        //        IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 0);
 
         //        List<int> result = ReadList(reader);
 
@@ -180,7 +180,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamChipIdsForUserTeamIdAndGameweekIdAndChipId";
 
@@ -229,7 +229,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamChipIdsForUserTeamId";
 
@@ -267,7 +267,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamIdsWithChips";
 
@@ -299,14 +299,14 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetLatestUserTeamChipUserTeamId";
 
                     //string selectQuery = @"SELECT MAX(userteamid) AS id FROM dbo.UserTeamChip utc WHERE NOT EXISTS (SELECT 1 FROM dbo.UserTeam_ManualInserts WHERE userteamid = utc.userteamid);";
 
                     int result = Convert.ToInt32(cmd.ExecuteScalar());
-                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 300);
+                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 0);
 
                     return result;
                 }
@@ -342,7 +342,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetCompetedUserTeamChipIds";
 
@@ -373,7 +373,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetChipIdFromName";
 
@@ -384,7 +384,7 @@ namespace FantasyPremierLeagueUserTeams
 
                     //string selectQuery = @"SELECT chipid AS id FROM dbo.Chip utc WHERE chipname = @ChipName;";
 
-                    //var result = db.ExecuteScalar<int>(selectQuery, new { ChipName = chipName }, commandTimeout: 300);
+                    //var result = db.ExecuteScalar<int>(selectQuery, new { ChipName = chipName }, commandTimeout: 0);
                     int result = Convert.ToInt32(cmd.ExecuteScalar());
 
                     return result;

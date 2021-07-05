@@ -20,7 +20,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 1000;
                         bulkCopy.DestinationTableName = "UserTeamCupStaging";
                         bulkCopy.EnableStreaming = true;
@@ -70,7 +70,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 bool rowsUpdated = false;
 
-                rowsUpdated = db.Update(cup);
+                rowsUpdated = db.Update(cup, commandTimeout: 0);
 
                 if (rowsUpdated == true)
                 {
@@ -144,7 +144,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllCupIdsForUserId";
 
@@ -197,7 +197,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetCompetedCupIds";
 

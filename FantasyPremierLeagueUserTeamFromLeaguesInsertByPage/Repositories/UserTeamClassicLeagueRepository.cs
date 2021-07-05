@@ -20,7 +20,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     using (var bulkCopy = new SqlBulkCopy(db))
                     {
-                        bulkCopy.BulkCopyTimeout = 1000;
+                        bulkCopy.BulkCopyTimeout = 0;
                         bulkCopy.BatchSize = 500;
                         bulkCopy.DestinationTableName = "UserTeamClassicLeagueStaging";
                         bulkCopy.EnableStreaming = true;
@@ -57,7 +57,7 @@ namespace FantasyPremierLeagueUserTeams
 
         //        //using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
         //        //{
-        //            rowsAffected = db.Insert(classicleague, commandTimeout: 300);
+        //            rowsAffected = db.Insert(classicleague, commandTimeout: 0);
         //        //}
 
         //        if (rowsAffected > 0)
@@ -80,7 +80,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 bool rowsUpdated = false;
 
-                rowsUpdated = db.Update(classicleague, commandTimeout: 300);
+                rowsUpdated = db.Update(classicleague, commandTimeout: 0);
 
                 if (rowsUpdated == true)
                 {
@@ -154,7 +154,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllClassicLeagueIdsForUserTeamId";
 
@@ -186,7 +186,7 @@ namespace FantasyPremierLeagueUserTeams
         {
             try
             { 
-                var classicleague = db.Get<UserTeamClassicLeague>(classicleagueId, commandTimeout: 300);
+                var classicleague = db.Get<UserTeamClassicLeague>(classicleagueId, commandTimeout: 0);
 
                 string classicleagueName = classicleague.name;
 
@@ -246,7 +246,7 @@ namespace FantasyPremierLeagueUserTeams
                     }
 
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds";
 
@@ -289,7 +289,7 @@ namespace FantasyPremierLeagueUserTeams
         //            string selectQuery = @"SELECT userteamid,COUNT(*) AS leagueCount FROM dbo.UserTeamClassicLeague WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
 
         //            cmd.Connection = db;
-        //            cmd.CommandTimeout = 300;
+        //            cmd.CommandTimeout = 0;
         //            cmd.CommandType = CommandType.Text;
         //            cmd.CommandText = selectQuery;
 

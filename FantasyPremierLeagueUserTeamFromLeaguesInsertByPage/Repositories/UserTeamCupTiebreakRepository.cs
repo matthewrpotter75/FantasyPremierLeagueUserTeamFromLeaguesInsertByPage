@@ -19,7 +19,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
                 {
-                    rowsAffected = db.Insert(cupTiebreak, commandTimeout: 300);
+                    rowsAffected = db.Insert(cupTiebreak, commandTimeout: 0);
                 }
 
                 if (rowsAffected > 0)
@@ -44,7 +44,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
                 {
-                    rowsUpdated = db.Update(cupTiebreak, commandTimeout: 300);
+                    rowsUpdated = db.Update(cupTiebreak, commandTimeout: 0);
                 }
 
                 if (rowsUpdated == true)
@@ -70,7 +70,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
                 {
-                    cupTiebreak = db.Get<UserTeamCupTiebreak>(userteamcupid, commandTimeout: 300);
+                    cupTiebreak = db.Get<UserTeamCupTiebreak>(userteamcupid, commandTimeout: 0);
                     rowsDeleted = db.Delete(new UserTeamCupTiebreak() { userteamcupid = userteamcupid });
                 }
 
@@ -127,7 +127,7 @@ namespace FantasyPremierLeagueUserTeams
                     //string selectQuery = @"SELECT id FROM dbo.UserTeamCup WHERE homeTeam_points = awayTeam_points;";
                     string selectQuery = @"SELECT homeTeam_userTeamid AS id FROM dbo.UserTeamCup utc WHERE homeTeam_points = awayTeam_points AND NOT EXISTS (SELECT 1 FROM dbo.UserTeamCupTiebreak WHERE userteamcupid = utc.id) ORDER BY id;";
 
-                    IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 300);
+                    IDataReader reader = db.ExecuteReader(selectQuery, commandTimeout: 0);
 
                     List<int> result = ReadList(reader);
 
@@ -151,7 +151,7 @@ namespace FantasyPremierLeagueUserTeams
                 {
                     string selectQuery = @"SELECT utct.tiebreak_name FROM dbo.UserTeamCupTiebreak utct INNER JOIN dbo.UserTeamCup utc ON utct.userteamcupid = utc.id WHERE utc.homeTeam_userTeamid = @UserTeamId";
 
-                    IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 300);
+                    IDataReader reader = db.ExecuteReader(selectQuery, new { UserTeamId = userTeamId }, commandTimeout: 0);
 
                     List<string> result = ReadStringList(reader);
 
@@ -171,7 +171,7 @@ namespace FantasyPremierLeagueUserTeams
         {
             using (IDbConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString))
             {
-                var cupTiebreak = db.Get<UserTeamCupTiebreak>(userteamcupId, commandTimeout: 300);
+                var cupTiebreak = db.Get<UserTeamCupTiebreak>(userteamcupId, commandTimeout: 0);
 
                 string cupTiebreakName = cupTiebreak.name;
 
