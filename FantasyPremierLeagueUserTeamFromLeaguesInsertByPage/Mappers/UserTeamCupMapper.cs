@@ -34,6 +34,8 @@ namespace FantasyPremierLeagueUserTeams
             Map(x => x.id).Key(KeyType.Assigned);
 
             //Ignore this property entirely
+            //Map(x => x.is_bye).Ignore();
+            //Map(x => x.knockout_name).Ignore();
             Map(x => x.tiebreak).Ignore();
 
             //optional, map all other columns

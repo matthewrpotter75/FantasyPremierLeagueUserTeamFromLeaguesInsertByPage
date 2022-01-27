@@ -5,6 +5,8 @@ using System.Data;
 using Dapper;
 using DapperExtensions;
 using DataStreams.ETL;
+using System.Configuration;
+using System.Threading;
 
 namespace FantasyPremierLeagueUserTeams
 {
@@ -397,6 +399,54 @@ namespace FantasyPremierLeagueUserTeams
             {
                 Logger.Error("UserTeam Repository (GetLatestGameweekId) error: " + ex.Message);
                 throw ex;
+            }
+        }
+
+        public DateTime GetNextDeadlineTime(SqlConnection db)
+        {
+            try
+            {
+                using (IDbCommand cmd = db.CreateCommand())
+                {
+                    cmd.Connection = db;
+                    cmd.CommandTimeout = 0;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.CommandText = "GetNextDeadlineTime";
+
+                    DateTime result = Convert.ToDateTime(cmd.ExecuteScalar());
+
+                    //var result = db.ExecuteScalar<int>(selectQuery, commandTimeout: 0);
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("UserTeam Repository (GetNextDeadlineTime) error: " + ex.Message);
+                throw ex;
+            }
+        }
+
+        public static void CheckNextDeadlineTime()
+        {
+            DateTime nextDeadlineTime;
+            UserTeamRepository userTeamRepository = new UserTeamRepository();
+
+            using (SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueDW"].ConnectionString))
+            {
+                db.Open();
+
+                nextDeadlineTime = userTeamRepository.GetNextDeadlineTime(db);
+
+                if (nextDeadlineTime != Globals.NextDeadlineTime)
+                {
+                    Globals.PreviousNextDeadlineTime = Globals.NextDeadlineTime;
+                    Globals.NextDeadlineTime = nextDeadlineTime;
+                    Thread.Sleep(TimeSpan.FromMinutes(60));
+                }
+
+                db.Close();
             }
         }
 

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Configuration;
 using System.Data;
 using Dapper;
 using DapperExtensions;
-using System.Linq;
 using DataStreams.ETL;
 
 namespace FantasyPremierLeagueUserTeams
@@ -139,7 +137,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamGameweekHistoryIdsForUserTeamId";
 
@@ -194,7 +192,7 @@ namespace FantasyPremierLeagueUserTeams
                     }
 
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetMaxGameweekIdForUserTeamIdsFromUserTeamGameweekHistory";
 
@@ -265,7 +263,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 //string selectQuery = @"SELECT team_name FROM dbo.UserTeamGameweekHistorys WHERE id = " + userTeamGameweekHistoryId.ToString();
 
-                var userTeamGameweekHistory = db.Get<UserTeamGameweekHistory>(userTeamGameweekHistoryId, commandTimeout: 300);
+                var userTeamGameweekHistory = db.Get<UserTeamGameweekHistory>(userTeamGameweekHistoryId, commandTimeout: 0);
 
                 string userTeamGameweekHistoryGameweek = Convert.ToString(userTeamGameweekHistory.@event);
 
@@ -285,7 +283,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetCompletedUserTeamGameweekHistoryIds";
 

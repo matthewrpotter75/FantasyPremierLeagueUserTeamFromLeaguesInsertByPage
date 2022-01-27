@@ -89,6 +89,7 @@
     <Compile Include="API\FantasyPremierLeagueAPI_UserTeamPick.cs" />
     <Compile Include="API\FantasyPremierLeagueAPI_UserTeamTransferHistory.cs" />
     <Compile Include="API\FantasyPremierLeagueLeaguesAPI.cs" />
+    <Compile Include="CommandLineArgumentsParser.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="UserTeamChipId.cs" />
     <Compile Include="ConfigSettings.cs" />

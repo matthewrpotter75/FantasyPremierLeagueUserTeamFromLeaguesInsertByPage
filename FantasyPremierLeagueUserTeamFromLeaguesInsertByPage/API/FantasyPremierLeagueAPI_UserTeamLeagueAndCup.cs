@@ -12,6 +12,8 @@ namespace FantasyPremierLeagueUserTeams
     {
         public static void GetUserTeamLeagueAndCupJson(int userTeamId, List<int> userTeamIds, string userTeamUrl, UserTeams userTeamsUpdateInsert, UserTeamCupMatches userTeamCupInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {
+            UserTeamRepository userTeamRepository = new UserTeamRepository();
+
             try
             {
                 var url = "";
@@ -47,8 +49,6 @@ namespace FantasyPremierLeagueUserTeams
                         Logger.Out(userTeamName);
                         //Logger.Out("");
 
-                        UserTeamRepository userTeamRepository = new UserTeamRepository();
-
                         if (!userTeamIds.Contains(userTeam.id))
                         {
                             userTeamRepository.InsertUserTeam(userTeam, db);
@@ -71,7 +71,7 @@ namespace FantasyPremierLeagueUserTeams
                             GetUserTeamH2hLeagueJson(userTeamId, userTeamData, userTeamH2hLeaguesInsert, db);
                         }
 
-                        if (userTeam.leagues.cup != null)
+                        if (userTeam.leagues.cup_matches != null)
                         {
                             GetUserTeamCupJson(userTeamId, userTeamData, userTeamCupInsert, db);
                         }
@@ -81,6 +81,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                //userTeamRepository.CheckNextDeadlineTime();
                 //throw new Exception("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }
@@ -96,7 +97,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 //int cupid, gameweekid;
 
-                foreach (UserTeamCupMatch match in userTeam.leagues.cup.matches)
+                foreach (UserTeamCupMatch match in userTeam.leagues.cup_matches)
                 {
                     match.fromuserteamid = userTeamId;
 

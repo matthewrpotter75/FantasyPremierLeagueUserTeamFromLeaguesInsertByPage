@@ -10,6 +10,8 @@ namespace FantasyPremierLeagueUserTeams
     {
         public static int LatestGameweek { get; set; }
         public static int ActualGameweek { get; set; }
+        public static DateTime NextDeadlineTime { get; set; }
+        public static DateTime PreviousNextDeadlineTime { get; set; }
         public static int ApiPageCalls { get; set; }
         public static int ApiCalls { get; set; }
         public static int ApiUserTeamCalls { get; set; }

@@ -4,6 +4,8 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Data;
 using log4net.Config;
+using System.Linq;
+using CommandLine.Utility;
 
 namespace FantasyPremierLeagueUserTeams
 {
@@ -32,6 +34,7 @@ namespace FantasyPremierLeagueUserTeams
             UserTeamRepository userTeamRepository = new UserTeamRepository();
 
             SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueUserTeam"].ConnectionString);
+            //SqlConnection dbDW = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueDW"].ConnectionString);
 
             try
             {
@@ -42,9 +45,17 @@ namespace FantasyPremierLeagueUserTeams
                 Globals.PageId = 1;
 
                 int insertInterval;
-                Globals.InsertInterval = 10;
+                Globals.InsertInterval = 1;
 
                 bool test = true;
+
+                //Arguments commandLine = new Arguments(args);
+                //if (commandLine["-t"] != null)
+                //{
+                //    args[] = {"1 1" };
+                //}
+
+                List<string> allArgs = args.ToList<string>();
 
                 if (args.Length == 0)
                 {
@@ -154,7 +165,7 @@ namespace FantasyPremierLeagueUserTeams
             }
             catch (Exception ex)
             {
-                Logger.Error(ex.Message);
+                Logger.Error("Program Exception Info (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "):" + ex.Message);
                 //Logger.Error(userTeamName + " caused error!!!");
 
                 if (db.State == ConnectionState.Closed)

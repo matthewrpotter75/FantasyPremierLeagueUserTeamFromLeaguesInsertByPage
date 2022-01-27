@@ -64,7 +64,7 @@ namespace FantasyPremierLeagueUserTeams
         public List<UserTeamClassicLeague> classic { get; set; }
         public List<UserTeamH2hLeague> h2h { get; set; }
         public UserTeamCup cup { get; set; }
-        //public List<UserTeamCup> cup { get; set; }
+        public List<UserTeamCupMatch> cup_matches { get; set; }
     }
 
     public class UserTeamClassicLeagues : List<UserTeamLeague> { }
@@ -108,7 +108,7 @@ namespace FantasyPremierLeagueUserTeams
     {
         [ExplicitKey]
         public int id { get; set; }
-        public int entry_1_entry { get; set; }
+        public int? entry_1_entry { get; set; }
         public string entry_1_name { get; set; }
         public string entry_1_player_name { get; set; }
         public int entry_1_points { get; set; }
@@ -116,7 +116,7 @@ namespace FantasyPremierLeagueUserTeams
         public int entry_1_draw { get; set; }
         public int entry_1_loss { get; set; }
         public int entry_1_total { get; set; }
-        public int entry_2_entry { get; set; }
+        public int? entry_2_entry { get; set; }
         public string entry_2_name { get; set; }
         public string entry_2_player_name { get; set; }
         public int entry_2_points { get; set; }
@@ -125,10 +125,13 @@ namespace FantasyPremierLeagueUserTeams
         public int entry_2_loss { get; set; }
         public int entry_2_total { get; set; }
         public bool is_knockout { get; set; }
+        public int league { get; set; }
         public int? winner { get; set; }
         public int? seed_value { get; set; }
         public int @event { get; set; }
         public string tiebreak { get; set; }
+        //public bool is_bye { get; set; }
+        //public string knockout_name { get; set; }
         //[ExplicitKey]
         public int fromuserteamid { get; set; }
     }
