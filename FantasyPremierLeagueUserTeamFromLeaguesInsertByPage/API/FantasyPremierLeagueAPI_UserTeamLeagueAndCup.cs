@@ -12,10 +12,10 @@ namespace FantasyPremierLeagueUserTeams
     {
         public static void GetUserTeamLeagueAndCupJson(int userTeamId, List<int> userTeamIds, string userTeamUrl, UserTeams userTeamsUpdateInsert, UserTeamCupMatches userTeamCupInsert, UserTeamClassicLeagues userTeamClassicLeaguesInsert, UserTeamH2hLeagues userTeamH2hLeaguesInsert, SqlConnection db)
         {
-            UserTeamRepository userTeamRepository = new UserTeamRepository();
-
             try
             {
+                UserTeamRepository userTeamRepository = new UserTeamRepository();
+
                 var url = "";
                 url = string.Format(userTeamUrl, userTeamId);
 
@@ -61,14 +61,17 @@ namespace FantasyPremierLeagueUserTeams
                             //userTeamRepository.UpdateUserTeam(userTeamsInsert, db);
                         }
 
-                        if (userTeamData.leagues.classic.Count != Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId)
+                        if (Globals.leagueProcessFlag == true)
                         {
-                            GetUserTeamClassicLeagueJson(userTeamId, userTeamData, userTeamClassicLeaguesInsert, db);
-                        }
+                            if (userTeamData.leagues.classic.Count != Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId)
+                            {
+                                GetUserTeamClassicLeagueJson(userTeamId, userTeamData, userTeamClassicLeaguesInsert, db);
+                            }
 
-                        if (userTeam.leagues.h2h != null)
-                        {
-                            GetUserTeamH2hLeagueJson(userTeamId, userTeamData, userTeamH2hLeaguesInsert, db);
+                            if (userTeam.leagues.h2h != null)
+                            {
+                                GetUserTeamH2hLeagueJson(userTeamId, userTeamData, userTeamH2hLeaguesInsert, db);
+                            }
                         }
 
                         if (userTeam.leagues.cup_matches != null)
@@ -80,8 +83,9 @@ namespace FantasyPremierLeagueUserTeams
             }
             catch (Exception ex)
             {
+                //UserTeamRepository userTeamRepository = new UserTeamRepository();
                 Logger.Error("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
-                //userTeamRepository.CheckNextDeadlineTime();
+                UserTeamRepository.CheckNextDeadlineTime();
                 //throw new Exception("GetUserTeamLeagueAndCupJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }

@@ -41,6 +41,8 @@ namespace FantasyPremierLeagueUserTeams
                 Logger.Out("Starting...");
                 Logger.Out("");
 
+                Globals.leagueProcessFlag = false;
+
                 int pageId;
                 Globals.PageId = 1;
 
@@ -49,11 +51,27 @@ namespace FantasyPremierLeagueUserTeams
 
                 bool test = true;
 
-                //Arguments commandLine = new Arguments(args);
-                //if (commandLine["-t"] != null)
+                Arguments commandLineArgs = new Arguments(args);
+
+                //Used for when testing
+                //if (commandLineArgs["-t"].Length == 0)
+                ////if (commandLineArgs[].Count == 0)
                 //{
-                //    args[] = {"1 1" };
+                //    commandLineArgs["-t"] = "1";
                 //}
+
+                //If test switch entered from command line
+                if (commandLineArgs["-t"] != null)
+                {
+                    //commandLineArgs[1] = "1";
+                }
+
+                //If test switch entered from command line
+                if (commandLineArgs["-lg"] != null)
+                {
+                    Globals.leagueProcessFlag = true;
+                    System.Console.WriteLine("Leagues processing switched on.");
+                }
 
                 List<string> allArgs = args.ToList<string>();
 
@@ -454,6 +472,14 @@ namespace FantasyPremierLeagueUserTeams
                 Globals.ActualGameweek = latestGameweek;
 
                 db.Close();
+            }
+        }
+
+        public class CommandInterface : ICommandLineInterface
+        {
+            public string[] GetCommandLineArgs()
+            {
+                return Environment.GetCommandLineArgs();
             }
         }
     }

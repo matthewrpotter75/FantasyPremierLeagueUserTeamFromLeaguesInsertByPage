@@ -167,6 +167,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 Logger.Error("GetUserTeamPickJson data exception (UserTeamId:" + userTeamId.ToString() + "/GameweekId:" + gameweekId.ToString() + "): " + ex.Message);
                 Logger.Error("GetUserTeamPickJson data exception (UserTeamId:" + userTeamId.ToString() + "/GameweekId:" + gameweekId.ToString() + "): skipping userteam/gameweek");
+                UserTeamRepository.CheckNextDeadlineTime();
                 //throw new Exception("GetUserTeamPickJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
                 //GetUserTeamPickJson(userTeamId, gameweekId, urlUserTeamPicks, maxGWFromPicksForUserTeamId, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, db);
                 //if (gameweekId + 1 < Globals.ActualGameweek)

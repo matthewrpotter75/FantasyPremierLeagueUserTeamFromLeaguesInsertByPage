@@ -161,7 +161,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamPickIdsForUserTeamIdAndGameweekId";
 
@@ -221,7 +221,7 @@ namespace FantasyPremierLeagueUserTeams
                     }
 
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetMaxGameweekIdForUserTeamIdsFromUserTeamPick";
 
@@ -293,7 +293,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamPickIds";
 
@@ -324,7 +324,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetMaxGameweekIdForUserTeamIdFromUserTeamPick";
 

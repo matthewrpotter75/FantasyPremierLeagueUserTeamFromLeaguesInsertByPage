@@ -104,7 +104,7 @@ namespace FantasyPremierLeagueUserTeams
                 bool rowsDeleted = false;
                 var userTeamChip = new UserTeamChip();
 
-                userTeamChip = db.Get<UserTeamChip>(chipid);
+                userTeamChip = db.Get<UserTeamChip>(chipid, commandTimeout: 0);
                 rowsDeleted = db.Delete(new UserTeamChip() { userteamid = userTeamid });
 
                 if (rowsDeleted == true)

@@ -78,7 +78,7 @@ namespace FantasyPremierLeagueUserTeams
                 bool rowsDeleted = false;
                 string userTeamTransferHistoryGameweek;
 
-                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId);
+                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId, commandTimeout: 0);
                 userTeamTransferHistoryGameweek = Convert.ToString(userTeamTransferHistory.@event);
 
                 rowsDeleted = db.Delete(new UserTeamTransferHistory() { userteamtransferhistoryid = userTeamTransferHistoryId });
@@ -104,7 +104,7 @@ namespace FantasyPremierLeagueUserTeams
                 string userTeamTransferHistoryGameweek;
                 int rowsDeleted;
 
-                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId);
+                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId, commandTimeout: 0);
                 userTeamTransferHistoryGameweek = Convert.ToString(userTeamTransferHistory.@event);
 
                 //rowsDeleted = db.Delete(new UserTeamTransferHistory() { element = userTeamTransferHistoryId });
@@ -132,7 +132,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamTransferHistoryIdsForUserTeamId";
 
@@ -168,7 +168,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetAllUserTeamIdsWithTransferHistory";
 
@@ -198,7 +198,7 @@ namespace FantasyPremierLeagueUserTeams
             {
                 //string selectQuery = @"SELECT team_name FROM dbo.UserTeamTransferHistorys WHERE id = " + userTeamTransferHistoryId.ToString();
 
-                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId, commandTimeout: 300);
+                var userTeamTransferHistory = db.Get<UserTeamTransferHistory>(userTeamTransferHistoryId, commandTimeout: 0);
 
                 string userTeamTransferHistoryGameweek = Convert.ToString(userTeamTransferHistory.@event);
 
@@ -218,7 +218,7 @@ namespace FantasyPremierLeagueUserTeams
                 using (IDbCommand cmd = db.CreateCommand())
                 {
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetCompetedUserTeamTransferHistoryIds";
 
@@ -268,7 +268,7 @@ namespace FantasyPremierLeagueUserTeams
                     }
 
                     cmd.Connection = db;
-                    cmd.CommandTimeout = 300;
+                    cmd.CommandTimeout = 0;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = "GetMaxGameweekIdForUserTeamIdsFromUserTeamTransferHistory";
 
@@ -311,7 +311,7 @@ namespace FantasyPremierLeagueUserTeams
         //            string selectQuery = @"SELECT userteamid,MAX(gameweekid) AS gameweekid FROM dbo.UserTeamTransferHistory WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
 
         //            cmd.Connection = db;
-        //            cmd.CommandTimeout = 100;
+        //            cmd.CommandTimeout = 0;
         //            cmd.CommandType = CommandType.Text;
         //            cmd.CommandText = selectQuery;
 

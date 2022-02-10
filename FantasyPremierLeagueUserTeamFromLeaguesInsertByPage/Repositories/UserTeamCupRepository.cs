@@ -26,103 +26,103 @@ namespace FantasyPremierLeagueUserTeams
                         bulkCopy.EnableStreaming = true;
 
                         // Add your column mappings here
-                        //bulkCopy.ColumnMappings.Add("id", "id");
-                        //bulkCopy.ColumnMappings.Add("entry_1_entry", "homeTeam_userTeamid");
-                        //bulkCopy.ColumnMappings.Add("entry_1_name", "homeTeam_userTeamName");
-                        //bulkCopy.ColumnMappings.Add("entry_1_player_name", "homeTeam_playerName");
-                        //bulkCopy.ColumnMappings.Add("entry_1_points", "homeTeam_points");
-                        //bulkCopy.ColumnMappings.Add("entry_1_win", "homeTeam_win");
-                        //bulkCopy.ColumnMappings.Add("entry_1_draw", "homeTeam_draw");
-                        //bulkCopy.ColumnMappings.Add("entry_1_loss", "homeTeam_loss");
-                        //bulkCopy.ColumnMappings.Add("entry_1_total", "homeTeam_total");
-                        //bulkCopy.ColumnMappings.Add("entry_2_entry", "awayTeam_userTeamid");
-                        //bulkCopy.ColumnMappings.Add("entry_2_name", "awayTeam_userTeamName");
-                        //bulkCopy.ColumnMappings.Add("entry_2_player_name", "awayTeam_playerName");
-                        //bulkCopy.ColumnMappings.Add("entry_2_points", "awayTeam_points");
-                        //bulkCopy.ColumnMappings.Add("entry_2_win", "awayTeam_win");
-                        //bulkCopy.ColumnMappings.Add("entry_2_draw", "awayTeam_draw");
-                        //bulkCopy.ColumnMappings.Add("entry_2_loss", "awayTeam_loss");
-                        //bulkCopy.ColumnMappings.Add("entry_2_total", "awayTeam_total");
-                        //bulkCopy.ColumnMappings.Add("event", "gameweekid");
+                        bulkCopy.ColumnMappings.Add("id", "id");
+                        bulkCopy.ColumnMappings.Add("entry_1_entry", "homeTeam_userTeamid");
+                        bulkCopy.ColumnMappings.Add("entry_1_name", "homeTeam_userTeamName");
+                        bulkCopy.ColumnMappings.Add("entry_1_player_name", "homeTeam_playerName");
+                        bulkCopy.ColumnMappings.Add("entry_1_points", "homeTeam_points");
+                        bulkCopy.ColumnMappings.Add("entry_1_win", "homeTeam_win");
+                        bulkCopy.ColumnMappings.Add("entry_1_draw", "homeTeam_draw");
+                        bulkCopy.ColumnMappings.Add("entry_1_loss", "homeTeam_loss");
+                        bulkCopy.ColumnMappings.Add("entry_1_total", "homeTeam_total");
+                        bulkCopy.ColumnMappings.Add("entry_2_entry", "awayTeam_userTeamid");
+                        bulkCopy.ColumnMappings.Add("entry_2_name", "awayTeam_userTeamName");
+                        bulkCopy.ColumnMappings.Add("entry_2_player_name", "awayTeam_playerName");
+                        bulkCopy.ColumnMappings.Add("entry_2_points", "awayTeam_points");
+                        bulkCopy.ColumnMappings.Add("entry_2_win", "awayTeam_win");
+                        bulkCopy.ColumnMappings.Add("entry_2_draw", "awayTeam_draw");
+                        bulkCopy.ColumnMappings.Add("entry_2_loss", "awayTeam_loss");
+                        bulkCopy.ColumnMappings.Add("entry_2_total", "awayTeam_total");
+                        bulkCopy.ColumnMappings.Add("event", "gameweekid");
 
-                        //bulkCopy.ColumnMappings.Add("is_knockout", "is_knockout");
-                        //bulkCopy.ColumnMappings.Add("winner", "winner");
-                        //bulkCopy.ColumnMappings.Add("seed_value", "seed_value");
-                        //bulkCopy.ColumnMappings.Add("fromuserteamid", "fromuserteamid");
-                        //bulkCopy.ColumnMappings.Add("tiebreak", "tiebreak");
-						//bulkCopy.ColumnMappings.Add("league", "league");
+                        bulkCopy.ColumnMappings.Add("is_knockout", "is_knockout");
+                        bulkCopy.ColumnMappings.Add("winner", "winner");
+                        bulkCopy.ColumnMappings.Add("seed_value", "seed_value");
+                        bulkCopy.ColumnMappings.Add("fromuserteamid", "fromuserteamid");
+                        bulkCopy.ColumnMappings.Add("tiebreak", "tiebreak");
+                        bulkCopy.ColumnMappings.Add("league", "league");
 
-                        SqlBulkCopyColumnMapping mappingId = new SqlBulkCopyColumnMapping("id", "id");
-                        bulkCopy.ColumnMappings.Add(mappingId);
+                        //SqlBulkCopyColumnMapping mappingId = new SqlBulkCopyColumnMapping("id", "id");
+                        //bulkCopy.ColumnMappings.Add(mappingId);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Id = new SqlBulkCopyColumnMapping("entry_1_entry", "homeTeam_userTeamid");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Id);
+                        //SqlBulkCopyColumnMapping mappingEntry1Id = new SqlBulkCopyColumnMapping("entry_1_entry", "homeTeam_userTeamid");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Id);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Name = new SqlBulkCopyColumnMapping("entry_1_name", "homeTeam_userTeamName");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Name);
+                        //SqlBulkCopyColumnMapping mappingEntry1Name = new SqlBulkCopyColumnMapping("entry_1_name", "homeTeam_userTeamName");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Name);
 
-                        SqlBulkCopyColumnMapping mappingEntry1PlayerName = new SqlBulkCopyColumnMapping("entry_1_player_name", "homeTeam_playerName");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1PlayerName);
+                        //SqlBulkCopyColumnMapping mappingEntry1PlayerName = new SqlBulkCopyColumnMapping("entry_1_player_name", "homeTeam_playerName");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1PlayerName);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Points = new SqlBulkCopyColumnMapping("entry_1_points", "homeTeam_points");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Points);
+                        //SqlBulkCopyColumnMapping mappingEntry1Points = new SqlBulkCopyColumnMapping("entry_1_points", "homeTeam_points");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Points);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Win = new SqlBulkCopyColumnMapping("entry_1_win", "homeTeam_win");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Win);
+                        //SqlBulkCopyColumnMapping mappingEntry1Win = new SqlBulkCopyColumnMapping("entry_1_win", "homeTeam_win");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Win);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Draw = new SqlBulkCopyColumnMapping("entry_1_draw", "homeTeam_draw");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Draw);
+                        //SqlBulkCopyColumnMapping mappingEntry1Draw = new SqlBulkCopyColumnMapping("entry_1_draw", "homeTeam_draw");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Draw);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Loss = new SqlBulkCopyColumnMapping("entry_1_loss", "homeTeam_loss");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Loss);
+                        //SqlBulkCopyColumnMapping mappingEntry1Loss = new SqlBulkCopyColumnMapping("entry_1_loss", "homeTeam_loss");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Loss);
 
-                        SqlBulkCopyColumnMapping mappingEntry1Total = new SqlBulkCopyColumnMapping("entry_1_total", "homeTeam_total");
-                        bulkCopy.ColumnMappings.Add(mappingEntry1Total);
+                        //SqlBulkCopyColumnMapping mappingEntry1Total = new SqlBulkCopyColumnMapping("entry_1_total", "homeTeam_total");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry1Total);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Id = new SqlBulkCopyColumnMapping("entry_2_entry", "awayTeam_userTeamid");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Id);
+                        //SqlBulkCopyColumnMapping mappingEntry2Id = new SqlBulkCopyColumnMapping("entry_2_entry", "awayTeam_userTeamid");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Id);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Name = new SqlBulkCopyColumnMapping("entry_2_name", "awayTeam_userTeamName");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Name);
+                        //SqlBulkCopyColumnMapping mappingEntry2Name = new SqlBulkCopyColumnMapping("entry_2_name", "awayTeam_userTeamName");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Name);
 
-                        SqlBulkCopyColumnMapping mappingEntry2PlayerName = new SqlBulkCopyColumnMapping("entry_2_player_name", "awayTeam_playerName");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2PlayerName);
+                        //SqlBulkCopyColumnMapping mappingEntry2PlayerName = new SqlBulkCopyColumnMapping("entry_2_player_name", "awayTeam_playerName");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2PlayerName);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Points = new SqlBulkCopyColumnMapping("entry_2_points", "awayTeam_points");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Points);
+                        //SqlBulkCopyColumnMapping mappingEntry2Points = new SqlBulkCopyColumnMapping("entry_2_points", "awayTeam_points");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Points);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Win = new SqlBulkCopyColumnMapping("entry_2_win", "awayTeam_win");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Win);
+                        //SqlBulkCopyColumnMapping mappingEntry2Win = new SqlBulkCopyColumnMapping("entry_2_win", "awayTeam_win");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Win);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Draw = new SqlBulkCopyColumnMapping("entry_2_draw", "awayTeam_draw");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Draw);
+                        //SqlBulkCopyColumnMapping mappingEntry2Draw = new SqlBulkCopyColumnMapping("entry_2_draw", "awayTeam_draw");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Draw);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Loss = new SqlBulkCopyColumnMapping("entry_2_loss", "awayTeam_loss");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Loss);
+                        //SqlBulkCopyColumnMapping mappingEntry2Loss = new SqlBulkCopyColumnMapping("entry_2_loss", "awayTeam_loss");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Loss);
 
-                        SqlBulkCopyColumnMapping mappingEntry2Total = new SqlBulkCopyColumnMapping("entry_2_total", "awayTeam_total");
-                        bulkCopy.ColumnMappings.Add(mappingEntry2Total);
+                        //SqlBulkCopyColumnMapping mappingEntry2Total = new SqlBulkCopyColumnMapping("entry_2_total", "awayTeam_total");
+                        //bulkCopy.ColumnMappings.Add(mappingEntry2Total);
 
-                        SqlBulkCopyColumnMapping mappingGameweekId = new SqlBulkCopyColumnMapping("event", "gameweekid");
-                        bulkCopy.ColumnMappings.Add(mappingGameweekId);
+                        //SqlBulkCopyColumnMapping mappingGameweekId = new SqlBulkCopyColumnMapping("event", "gameweekid");
+                        //bulkCopy.ColumnMappings.Add(mappingGameweekId);
 
-                        SqlBulkCopyColumnMapping mappingIsKnockout = new SqlBulkCopyColumnMapping("is_knockout", "is_knockout");
-                        bulkCopy.ColumnMappings.Add(mappingIsKnockout);
+                        //SqlBulkCopyColumnMapping mappingIsKnockout = new SqlBulkCopyColumnMapping("is_knockout", "is_knockout");
+                        //bulkCopy.ColumnMappings.Add(mappingIsKnockout);
 
-                        SqlBulkCopyColumnMapping mappingWinner = new SqlBulkCopyColumnMapping("winner", "winner");
-                        bulkCopy.ColumnMappings.Add(mappingWinner);
+                        //SqlBulkCopyColumnMapping mappingWinner = new SqlBulkCopyColumnMapping("winner", "winner");
+                        //bulkCopy.ColumnMappings.Add(mappingWinner);
 
-                        SqlBulkCopyColumnMapping mappingSeedValue = new SqlBulkCopyColumnMapping("seed_value", "seed_value");
-                        bulkCopy.ColumnMappings.Add(mappingSeedValue);
+                        //SqlBulkCopyColumnMapping mappingSeedValue = new SqlBulkCopyColumnMapping("seed_value", "seed_value");
+                        //bulkCopy.ColumnMappings.Add(mappingSeedValue);
 
-                        SqlBulkCopyColumnMapping mappingFromUserTeamId = new SqlBulkCopyColumnMapping("fromuserteamid", "fromuserteamid");
-                        bulkCopy.ColumnMappings.Add(mappingFromUserTeamId);
+                        //SqlBulkCopyColumnMapping mappingFromUserTeamId = new SqlBulkCopyColumnMapping("fromuserteamid", "fromuserteamid");
+                        //bulkCopy.ColumnMappings.Add(mappingFromUserTeamId);
 
-                        SqlBulkCopyColumnMapping mappingTiebreak = new SqlBulkCopyColumnMapping("tiebreak", "tiebreak");
-                        bulkCopy.ColumnMappings.Add(mappingTiebreak);
-						
-						SqlBulkCopyColumnMapping mappingLeague = new SqlBulkCopyColumnMapping("league", "league");
-                        bulkCopy.ColumnMappings.Add(mappingLeague);
+                        //SqlBulkCopyColumnMapping mappingTiebreak = new SqlBulkCopyColumnMapping("tiebreak", "tiebreak");
+                        //bulkCopy.ColumnMappings.Add(mappingTiebreak);
+
+                        //SqlBulkCopyColumnMapping mappingLeague = new SqlBulkCopyColumnMapping("league", "league");
+                        //bulkCopy.ColumnMappings.Add(mappingLeague);
 
                         bulkCopy.WriteToServer(reader);
                         rowsAffected = SqlBulkCopyExtension.RowsCopiedCount(bulkCopy);

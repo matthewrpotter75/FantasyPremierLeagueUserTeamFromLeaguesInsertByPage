@@ -41,5 +41,6 @@ namespace FantasyPremierLeagueUserTeams
         public static int UserTeamClassicLeagueRowsInserted { get; set; }
         public static int UserTeamH2hLeagueRowsInserted { get; set; }
         public static int UserTeamCupRowsInserted { get; set; }
+        public static bool leagueProcessFlag { get; set; }
     }
 }

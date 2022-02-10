@@ -23,6 +23,8 @@ namespace FantasyPremierLeagueUserTeams
             UserTeamClassicLeagueRepository userTeamClassicLeagueRepository = new UserTeamClassicLeagueRepository();
             UserTeamSeasonRepository userTeamSeasonRepository = new UserTeamSeasonRepository();
 
+            DataTable dtClassicLeagueCountForUserTeam = new DataTable();
+
             try
             {
 				int userTeamId = 0;
@@ -78,10 +80,15 @@ namespace FantasyPremierLeagueUserTeams
                         using (DataTable dtUserMaxGWForUserTeamForGameweekHistory = userTeamGameweekHistoryRepository.GetMaxGameweekIdFromUserTeamGameweekHistoryForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserMaxGWForUserTeamForPicks = userTeamPickRepository.GetMaxGameweekIdFromUserTeamPickForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserMaxGWForUserTeamForTransferHistory = userTeamTransferHistoryRepository.GetMaxGameweekIdFromUserTeamTransferHistoryForUserTeamIds(pageUserTeamIds, db))
-                        using (DataTable dtClassicLeagueCountForUserTeam = userTeamClassicLeagueRepository.GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds(pageUserTeamIds, db))
+                        //using (DataTable dtClassicLeagueCountForUserTeam = userTeamClassicLeagueRepository.GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtSeasonCountForUserTeam = userTeamSeasonRepository.GetSeasonCountFromUserTeamSeasonForUserTeamIds(pageUserTeamIds, db))
                         using (DataTable dtUserTeam = userTeamRepository.GetUserTeamForUserTeamIds(pageUserTeamIds, db))
                         {
+                            if (Globals.leagueProcessFlag == true)
+                            {
+                                dtClassicLeagueCountForUserTeam = userTeamClassicLeagueRepository.GetClassicLeagueCountFromUserTeamClassicLeagueForUserTeamIds(pageUserTeamIds, db);
+                            }
+
                             foreach (TeamLeaguePosition teamLeaguePosition in standings.results)
                             {
                                 userTeamId = teamLeaguePosition.entry;
@@ -89,12 +96,23 @@ namespace FantasyPremierLeagueUserTeams
                                 Globals.MaxGWFromGameweekHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForGameweekHistory, "gameweekid");
                                 Globals.MaxGWFromPicksForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForPicks, "gameweekid");
                                 Globals.MaxGWFromTransferHistoryForUserTeamId = GetColumnNameValue(userTeamId, dtUserMaxGWForUserTeamForTransferHistory, "gameweekid");
-                                Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId = GetColumnNameValue(userTeamId, dtClassicLeagueCountForUserTeam, "leagueCount");
                                 Globals.SeasonCountFromUserTeamSeasonForUserTeamId = GetColumnNameValue(userTeamId, dtSeasonCountForUserTeam, "seasonCount");
                                 Globals.ExistingUserTeamId = GetColumnNameValue(userTeamId, dtUserTeam, "userteamid");
 
+                                if (Globals.leagueProcessFlag == true)
+                                {
+                                    Globals.LeagueCountFromUserTeamClassicLeagueForUserTeamId = GetColumnNameValue(userTeamId, dtClassicLeagueCountForUserTeam, "leagueCount");
+                                }
+
                                 FantasyPremierLeagueAPIClient.GetUserTeamDataJson(userTeamId, userTeamIds, userTeamUrl, userTeamsUpdateInsert, userTeamCupInsert, userTeamClassicLeaguesInsert, userTeamH2hLeaguesInsert, userTeamGameweekHistoriesInsert, userTeamPicksInsert, userTeamPickAutomaticSubsInsert, userTeamChipsInsert, userTeamTransferHistoriesInsert, userTeamSeasonsInsert, db);
                             }
+
+                            dtUserTeam.Clear();
+                            dtUserMaxGWForUserTeamForGameweekHistory.Clear();
+                            dtUserMaxGWForUserTeamForPicks.Clear();
+                            dtUserMaxGWForUserTeamForTransferHistory.Clear();
+                            dtSeasonCountForUserTeam.Clear();
+                            dtClassicLeagueCountForUserTeam.Clear();
                         }
                         pageUserTeamIds.Clear();
                     }
@@ -104,6 +122,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetLeagueDataJson data exception (LeagueId: " + leagueId.ToString() + ", PageId:" + Globals.PageId.ToString() + "): " + ex.Message);
+                UserTeamRepository.CheckNextDeadlineTime();
 
                 bool has_next = true;
 

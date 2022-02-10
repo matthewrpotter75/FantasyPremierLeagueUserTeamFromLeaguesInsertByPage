@@ -91,7 +91,7 @@ namespace FantasyPremierLeagueUserTeams
                 bool rowsDeleted = false;
                 string userTeamName;
 
-                var userTeam = db.Get<UserTeam>(userTeamId);
+                var userTeam = db.Get<UserTeam>(userTeamId, commandTimeout: 0);
                 userTeamName = userTeam.name;
 
                 rowsDeleted = db.Delete(new UserTeam() { id = userTeamId });
@@ -117,7 +117,7 @@ namespace FantasyPremierLeagueUserTeams
                 string userTeamName;
                 int rowsDeleted;
 
-                var userTeam = db.Get<UserTeam>(userTeamId);
+                var userTeam = db.Get<UserTeam>(userTeamId, commandTimeout: 0);
                 userTeamName = userTeam.name;
 
                 //rowsDeleted = db.Delete(new UserTeam() { element = userTeamId });

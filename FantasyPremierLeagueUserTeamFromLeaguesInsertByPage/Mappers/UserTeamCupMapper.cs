@@ -31,6 +31,8 @@ namespace FantasyPremierLeagueUserTeams
             Map(x => x.entry_2_loss).Column("awayTeam_loss");
             Map(x => x.entry_2_total).Column("awayTeam_total");
 
+            Map(x => x.league).Column("league");
+
             Map(x => x.id).Key(KeyType.Assigned);
 
             //Ignore this property entirely

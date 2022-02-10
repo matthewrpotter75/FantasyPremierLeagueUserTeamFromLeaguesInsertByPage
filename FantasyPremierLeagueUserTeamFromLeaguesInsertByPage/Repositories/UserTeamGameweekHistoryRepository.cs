@@ -235,7 +235,7 @@ namespace FantasyPremierLeagueUserTeams
         //            string selectQuery = @"SELECT userteamid,MAX(gameweekid) AS gameweekid FROM dbo.UserTeamGameweekHistory WHERE userteamid IN (" + paramNames + ") GROUP BY userteamid;";
 
         //            cmd.Connection = db;
-        //            cmd.CommandTimeout = 300;
+        //            cmd.CommandTimeout = 0;
         //            cmd.CommandType = CommandType.Text;
         //            cmd.CommandText = selectQuery;
 
