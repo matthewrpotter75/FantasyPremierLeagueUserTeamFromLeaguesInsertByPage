@@ -47,7 +47,7 @@ namespace FantasyPremierLeagueUserTeams
                 Globals.PageId = 1;
 
                 int insertInterval;
-                Globals.InsertInterval = 1;
+                Globals.InsertInterval = 5;
 
                 bool test = true;
 
@@ -113,6 +113,8 @@ namespace FantasyPremierLeagueUserTeams
 
                 string userTeamUrl = ConfigSettings.ReadSetting("userTeamURL");
                 string userTeamLeaguesUrl = ConfigSettings.ReadSetting("userTeamLeaguesURL");
+
+                UserTeamRepository.SetNextDeadlineTime();
 
                 using (db)
                 {

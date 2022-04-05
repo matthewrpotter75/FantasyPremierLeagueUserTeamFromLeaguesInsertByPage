@@ -44,6 +44,7 @@ namespace FantasyPremierLeagueUserTeams
             catch (Exception ex)
             {
                 Logger.Error("GetUserTeamTransferHistoryDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
+                UserTeamRepository.CheckNextDeadlineTime();
                 throw new Exception("GetUserTeamTransferHistoryDataJson data exception (UserTeamId: " + userTeamId.ToString() + "): " + ex.Message);
             }
         }

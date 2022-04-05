@@ -428,6 +428,21 @@ namespace FantasyPremierLeagueUserTeams
             }
         }
 
+        public static void SetNextDeadlineTime()
+        {
+            UserTeamRepository userTeamRepository = new UserTeamRepository();
+
+            using (SqlConnection db = new SqlConnection(ConfigurationManager.ConnectionStrings["FantasyPremierLeagueDW"].ConnectionString))
+            {
+                db.Open();
+
+                Globals.NextDeadlineTime = userTeamRepository.GetNextDeadlineTime(db);
+                Globals.PreviousNextDeadlineTime = Globals.NextDeadlineTime;
+
+                db.Close();
+            }
+        }
+
         public static void CheckNextDeadlineTime()
         {
             DateTime nextDeadlineTime;
