@@ -175,7 +175,7 @@ namespace FantasyPremierLeagueUserTeams
 
                 foreach (UserTeamGameweekHistory userTeamGameweekHistory in userTeamHistoryData.current)
                 {
-                    if (userTeamGameweekHistory.@event > Globals.MaxGWFromGameweekHistoryForUserTeamId && userTeamGameweekHistory.@event <= Globals.LatestGameweek)
+                    if (userTeamGameweekHistory.@event > Globals.MaxGWFromGameweekHistoryForUserTeamId && userTeamGameweekHistory.@event < Globals.LatestGameweek)
                     {
                         userTeamGameweekHistory.userteamid = userTeamId;
 

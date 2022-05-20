@@ -57,17 +57,17 @@ namespace FantasyPremierLeagueUserTeams
                 //if (commandLineArgs["-t"].Length == 0)
                 ////if (commandLineArgs[].Count == 0)
                 //{
-                //    commandLineArgs["-t"] = "1";
+                //    commandLineArgs["t"] = "1";
                 //}
 
                 //If test switch entered from command line
-                if (commandLineArgs["-t"] != null)
+                if (commandLineArgs["t"] != null)
                 {
                     //commandLineArgs[1] = "1";
                 }
 
                 //If test switch entered from command line
-                if (commandLineArgs["-lg"] != null)
+                if (commandLineArgs["lg"] != null)
                 {
                     Globals.leagueProcessFlag = true;
                     System.Console.WriteLine("Leagues processing switched on.");
